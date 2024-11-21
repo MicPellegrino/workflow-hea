@@ -1,0 +1,21 @@
+
+
+# ----------------- Init Section -----------------
+
+include "Water_Graph_40%_relax.in.init"
+
+
+# ----------------- Atom Definition Section -----------------
+
+read_data "Water_Graph_40%.data"
+
+# ----------------- Settings Section -----------------
+
+include "Water_Graph_40%_relax.in.settings"
+
+
+# ----------------- Run Section -----------------
+
+include "Water_Graph_40%_relax.in.run"
+
+

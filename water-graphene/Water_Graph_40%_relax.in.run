@@ -1,0 +1,70 @@
+# Physical observables.
+
+compute temp_water water temp
+compute temp_graph graph temp 
+
+compute msqdis  all msd com yes
+
+# Output.
+thermo          1000
+thermo_style custom step etotal evdwl ecoul elong ebond eangle ke pe temp c_temp_water c_temp_graph &
+press vol density c_msqdis[1] c_msqdis[2] c_msqdis[3] c_msqdis[4] cpu
+thermo_modify flush yes
+
+# Save UNWRAPPED coordinates.
+dump 1 all custom 25000 ${run}.dump id type element x y z xu yu zu vx vy vz mol
+dump_modify 1 element O H C C O H
+
+
+
+# 1. Shrink the cell to the target density.
+
+timestep        1.
+
+velocity        water create ${temp} 391624 dist gaussian
+
+fix 		freeze graph setforce 0.0 0.0 0.0
+
+fix             3 water nve
+fix		4 water langevin ${temp} ${temp} 100 537199
+fix_modify      4 temp temp_water 
+
+fix             5 water deform 1 z scale .957 units box remap x
+
+# 100 ps per cycle.
+
+label    cycle1
+variable i loop ${steps}
+  print "*** Shrinking step $i/${steps} ***"
+  run    50000
+  next   i
+jump SELF cycle1
+variable i delete
+
+write_data compressed_water-graph_40%.data nocoeff
+
+
+
+
+
+# 2. Thermalisation and relaxation, 2 ns.
+
+unfix freeze
+unfix 3
+unfix 4
+unfix 5
+
+fix 1 all box/relax iso 0.0 vmax 0.0005
+minimize 0.0 1.0e-9 5000 200000
+unfix 1
+
+fix 	       mom graph momentum 100 linear 1 1 1
+fix            2 all nph aniso 1 1 1000
+fix            3 graph langevin ${temp} ${temp} 100 237498
+fix 	       4 water langevin ${temp} ${temp} 100 537199
+fix_modify     3 temp temp_graph
+fix_modify     4 temp temp_water
+
+run    2000000
+
+write_data relaxed_water-graph_40%.data nocoeff

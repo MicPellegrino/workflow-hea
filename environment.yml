@@ -1,0 +1,47 @@
+name: workflow-hea
+
+channels:
+
+  - conda-forge
+  - defaults
+
+# Probably not necessary, but good to have for MACE
+# - nvidia
+# - pytorch
+
+dependencies:
+
+# MACE and LAMMPS won't work with python<3.10
+  - python==3.10
+
+  - notebook=6.5.5
+  - matplotlib
+  - nglview
+  - numpy
+  - mdanalysis
+  
+  - lammps
+
+# Pytorch stuff
+# - nvidia::cudatoolkit=11.8
+# - pytorch
+# - torchvision
+# - torchaudio
+
+# Other potentially useful stuff
+# - mdtraj
+# - ipympl
+# - jupyter
+# - ipykernel
+# - ipywidgets
+# - requests
+# - pandas
+# - seaborn
+# - compilers
+# - openmpi
+# - cmake
+# - scipy
+
+# MACE needs to be installed using pip
+  - pip:  
+    - mace-torch
