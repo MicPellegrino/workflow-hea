@@ -20,6 +20,11 @@ and deactivate it by running:
 mamba deactivate
 ```
 
+I haven't found a way to install Ovito from the `.yml` file that doesn't break MACE. If you want to use Ovito, run the following line after activating the environment:
+```
+mamba install --strict-channel-priority -c https://conda.ovito.org -c conda-forge ovito=3.11.1
+```
+
 ## Example: water-graphene simulation
 
 The simulation is described in `water-graphene/SIMULATION-README.txt`. You can use the ´stub´ notebook `water-graphene/workflow.ipynb` to initialize and run a very short simulation, as the full simulation requires either substantial compute resources or a lot of time.
