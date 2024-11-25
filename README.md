@@ -23,3 +23,7 @@ mamba deactivate
 ## Example: water-graphene simulation
 
 The simulation is described in `water-graphene/SIMULATION-README.txt`. You can use the ´stub´ notebook `water-graphene/workflow.ipynb` to initialize and run a very short simulation, as the full simulation requires either substantial compute resources or a lot of time.
+
+## Example: embedded atom model
+
+The simulation is essentially based on an example by S. Gravelle: https://github.com/simongravelle/lammps-input-files/tree/main/inputs/melting-gold. You can use the notebook `workflow-hea/workflow.ipynb` to initialize and simulate a cube of melting gold using the EAM potential.
