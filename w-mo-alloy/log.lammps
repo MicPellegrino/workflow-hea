@@ -1,0 +1,134 @@
+LAMMPS (2 Aug 2023 - Update 4)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+######################################
+# LAMMPS INPUT SCRIPT
+# Find minimum energy bcc (body-centered cubic) atomic configuration
+# Modified for W supercell
+
+######################################
+# INITIALIZATION
+clear
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+units metal
+dimension 3
+boundary p p p # Periodic boundary conditions in all directions
+atom_style atomic # bond, angles, dihedral not needed
+atom_modify map array # Check it!
+
+######################################
+# ATOM DEFINITION
+lattice bcc 3.165 # Lattice parameter for W [Å]
+Lattice spacing in x,y,z = 3.165 3.165 3.165
+region box block 0 1 0 1 0 1 units lattice # Define the simulation box (command "region" defines a geometric region of space)
+create_box 1 box # Create the simulation box (1 is the numeber of atom type)
+Created orthogonal box = (0 0 0) to (3.165 3.165 3.165)
+  1 by 1 by 1 MPI processor grid
+create_atoms 1 box # Create atoms inside the box (1 is the numeber of atom type)
+Created 2 atoms
+  using lattice units in orthogonal box = (0 0 0) to (3.165 3.165 3.165)
+  create_atoms CPU = 0.001 seconds
+replicate 10 10 25 # Replicate to create a 10x10x25 supercell
+Replication is creating a 10x10x25 = 2500 times larger system...
+  orthogonal box = (0 0 0) to (31.65 31.65 79.125)
+  1 by 1 by 1 MPI processor grid
+  5000 atoms
+  replicate CPU = 0.003 seconds
+
+######################################
+# DEFINE INTERATOMIC POTENTIAL
+pair_style eam/fs # Use the EAM/fs potential style
+pair_coeff * * WMo.eam.fs W # Use the EAM potential file for W
+neighbor 2.0 bin # Set the neighbor list by binning ("For unsolvated small molecules in a non-periodic box, the nsq choice can sometimes be faster" wrt bin)
+neigh_modify delay 0 every 1 check yes # Update neighbor list every timestep ("every 1") if any atom moves ("check yes") more than half the neighbor skin distance. (every 1 too high maybe)
+# Check "2.0 bin" and "every 1"! (simulation NVE to check)
+
+write_data system_w.data nocoeff # Write initial atomic configuration to file. ("nocoeff" doesn't write ff parameters)
+System init for write_data ...
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 7.3
+  ghost atom cutoff = 7.3
+  binsize = 3.65, bins = 9 9 22
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair eam/fs, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d
+      bin: standard
+
+######################################
+# DEFINE COMPUTES
+compute eng all pe/atom # Compute potential energy per atom
+compute eatoms all reduce sum c_eng # Compute total potential energy
+
+#####################################################
+# ENERGY MINIMIZATION
+reset_timestep 0 # Reset the timestep counter
+fix 1 all box/relax iso 0.0 vmax 0.001 # Apply isotropic box relaxation with a maximum velocity
+thermo 10 # Print thermo output every 10 steps
+thermo_style custom step pe lx ly lz press c_eatoms # Custom thermo output style (pe if atom_types=1)
+min_style cg # Use conjugate gradient minimization
+minimize 1e-25 1e-25 5000 10000 # Minimization settings: tolerance and iteration limits
+WARNING: Energy due to 1 extra global DOFs will be included in minimizer energies
+ (src/min.cpp:228)
+Per MPI rank memory allocation (min/avg/max) = 5.711 | 5.711 | 5.711 Mbytes
+   Step         PotEng           Lx             Ly             Lz           Press         c_eatoms   
+         0  -44499.994      31.65          31.65          79.125         587.41541     -44499.994    
+         3  -44499.996      31.651997      31.651997      79.129993      0.33231839    -44499.996    
+Loop time of 0.215825 on 1 procs for 3 steps with 5000 atoms
+
+98.9% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+     -44499.9937303325  -44499.9964822984  -44499.9964822984
+  Force two-norm initial, final = 87.180104 0.049326606
+  Force max component initial, final = 87.180104 0.049326606
+  Final line search alpha, max atom move = 4.9494714e-06 2.4414063e-07
+  Iterations, force evaluations = 3 33
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.20915    | 0.20915    | 0.20915    |   0.0 | 96.91
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.0010096  | 0.0010096  | 0.0010096  |   0.0 |  0.47
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0.005669   |            |       |  2.63
+
+Nlocal:           5000 ave        5000 max        5000 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           7434 ave        7434 max        7434 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:         280000 ave      280000 max      280000 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 280000
+Ave neighs/atom = 56
+Neighbor list builds = 0
+Dangerous builds = 0
+
+
+variable natoms equal "count(all)" # Total number of atoms
+variable teng equal "c_eatoms" # Total energy
+variable length equal "lx" # Simulation x length (box length in x-direction)
+variable ecoh equal "v_teng/v_natoms" # Cohesive energy
+
+print "Total energy (eV) = ${teng};"
+Total energy (eV) = -44499.9964821178;
+print "Number of atoms = ${natoms};"
+Number of atoms = 5000;
+print "Cohesive energy (eV) = ${ecoh};"
+Cohesive energy (eV) = -8.89999929642356;
+
+print "All done!" #
+All done!
+
+write_data system_w_en_min.data nocoeff # Write the minimized atomic configuration to file
+System init for write_data ...
+Total wall time: 0:00:00
