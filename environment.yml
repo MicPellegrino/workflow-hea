@@ -18,6 +18,9 @@ dependencies:
   - matplotlib
   - numpy
 
+  # To run LAMMPS in parallel
+  - mpi4py
+
   # Simulators and orchestrator:
   - lammps
   - ase
