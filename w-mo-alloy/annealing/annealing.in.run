@@ -9,7 +9,7 @@
 	dump_modify     d1 element W Mo
 
 # Output temperature
-	fix myat1 all ave/time 50 500 5000 v_Toutput file temperature.dat
+	fix myat1 all ave/time 10 100 5000 v_Toutput file temperature.dat
 
 
 # ----- INITIAL EQUILIBRATION AT Ti -----
