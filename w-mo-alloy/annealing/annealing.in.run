@@ -15,19 +15,19 @@
 # ----- INITIAL EQUILIBRATION AT Ti -----
 	velocity        all create ${Ti} 872392 dist gaussian
 	fix             feq all npt temp ${Ti} ${Ti} ${tdamp} iso ${pressc} ${pressh} ${pdamp}
-	run             200000    # 200 ps
+	run             500000    # 500 ps
 	unfix           feq
 
 
 # ----- HEATING FROM Ti TO Thigh -----
 	fix             fheat all npt temp ${Ti} ${Thigh} ${tdamp} iso ${pressh} ${pressh} ${pdamp}
-	run             1000000   # 1 ns
+	run             2000000   # 2 ns
 	unfix           fheat
 
 
 # ----- HOLD AT Thigh -----
 	fix             fholdhigh all npt temp ${Thigh} ${Thigh} ${tdamp} aniso ${pressh} ${pressc} ${pdamp}
-	run             1000000   # 1 ns
+	run             2000000   # 2 ns
 	unfix           fholdhigh
 
 
