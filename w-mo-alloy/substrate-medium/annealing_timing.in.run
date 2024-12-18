@@ -1,0 +1,15 @@
+# Thermo output
+	thermo          1000
+	thermo_style    custom step temp press pe ke etotal vol density
+	thermo_modify   flush yes
+
+# Dump configuration
+	# dump 			dmp all custom 50000 dump.lammpstrj id type x y z xu yu zu vx vy vz # Alternative output file format
+	dump            d1 all custom 50000 annealed_system.dump id type x y z xu yu zu vx vy vz
+	dump_modify     d1 element W Mo
+
+# ----- Quick run to time the simulation -----
+	velocity        all create ${Tlow} 872392 dist gaussian
+	fix             feq all nvt temp ${Tlow} ${Tlow} ${tdamp}
+	run             10000
+	unfix           feq

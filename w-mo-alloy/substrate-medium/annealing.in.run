@@ -15,29 +15,34 @@
 # ----- INITIAL EQUILIBRATION AT Tlow -----
 	velocity        all create ${Tlow} 872392 dist gaussian
 	fix             feq all nvt temp ${Tlow} ${Tlow} ${tdamp}
-	run             250000   # 250 ns
+	run             500000   # 500 ps
+	# run           50000
 	unfix           feq
 
 
 # ----- HEATING FROM Tlow TO Thigh -----
 	fix             fheat all nvt temp ${Tlow} ${Thigh} ${tdamp}
-	run             1000000   # 1 ns
+	run             2000000   # 2 ns
+	# run           200000
 	unfix           fheat
 
 
 # ----- HOLD AT Thigh -----
 	fix             fholdhigh all nvt temp ${Thigh} ${Thigh} ${tdamp}
-	run             1000000   # 1 ns
+	run             2000000   # 2 ns
+	# run           200000
 	unfix           fholdhigh
 
 # ----- COOLING FROM Thigh TO Tlow -----
 	fix             fcool all nvt temp ${Thigh} ${Tlow} ${tdamp}
-	run             1000000   # 1 ns
+	run             2000000   # 2 ns
+	# run           200000
 	unfix           fcool
 
 # ----- HOLD AT Tfinal -----
 	fix             ffinal all nvt temp ${Tlow} ${Tlow} ${tdamp}
-	run             250000   # 250 ns
+	run             500000   # 500 ps
+	# run           50000 
 	unfix           ffinal
 
 
