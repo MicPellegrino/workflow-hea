@@ -31,4 +31,13 @@ timestep 0.001
 dump dp1 all atom 100 dump.lammpstrj
 thermo 100
 
+# Testing density binning
+compute myBins all chunk/atom bin/2d z lower 2.0 y lower 2.0
+fix myDens all ave/chunk 100 10 1000 myBins density/mass file tmp.out
+
+# ???
+# compute myGrid all property/grid 100 100 1 id ix iy iz
+# fix myDensFix all ave/grid 100 10 1000 100 100 1 density/mass c_myGrid:grid:data[*]
+# dump dmpVtk all vtk 100 dump*.density.vtk f_myDensFix:grid:data[*]
+
 run 10000
