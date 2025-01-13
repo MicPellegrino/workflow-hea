@@ -1,2 +1,4 @@
 pair_style eam/fs
 pair_coeff * * FeAu-eam-LJ.fs Au
+# pair_style eam/alloy
+# pair_coeff * * CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Au
