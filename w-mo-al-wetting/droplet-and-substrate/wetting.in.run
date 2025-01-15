@@ -1,0 +1,16 @@
+# Thermo output
+	thermo          10000
+	thermo_style    custom step temp press pe ke etotal vol density
+	thermo_modify   flush yes
+
+# Dump configuration
+	dump            d1 all custom 5000 wetting.dump id type x y z xu yu zu vx vy vz
+	dump_modify     d1 element Al W Mo
+
+# ----- INITIAL EQUILIBRATION AT Tlow -----
+	velocity        all create ${T} 872392 dist gaussian
+	fix             feq all nvt temp ${T} ${T} ${tdamp}
+	run             1000000   # 1 ns
+	unfix           feq
+
+

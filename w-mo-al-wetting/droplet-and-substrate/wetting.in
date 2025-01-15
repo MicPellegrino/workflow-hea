@@ -1,0 +1,27 @@
+# When running on GPU
+package gpu 1
+
+# ----------------- Init Section -----------------
+
+include "wetting.in.init"
+
+
+# ----------------- Atom Definition Section -----------------
+
+read_data "droplet_Al-transformed.data"
+read_data "annealed_surface_WMo.data" add append offset 1 0 0 0 0 
+
+# ----------------- Settings Section -----------------
+
+include "wetting.in.settings"
+
+# ----------------- Run Section -----------------
+
+# Energy minimization
+    minimize 1.0e-4 1.0e-6 100 1000
+    reset_timestep 0
+
+include "wetting.in.run"
+# include "wetting.in.time"
+
+write_data      wetting_Al_WMo.data
