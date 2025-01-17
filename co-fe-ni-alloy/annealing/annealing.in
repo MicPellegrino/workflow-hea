@@ -1,0 +1,18 @@
+# ----------------- Init Section -----------------
+
+package gpu 1
+
+include "annealing.in.init"
+
+
+# ----------------- Atom Definition Section -----------------
+
+read_data "../minimization/system_Co-Fe-Ni_en_min.data"
+
+# ----------------- Settings Section -----------------
+
+include "annealing.in.settings"
+
+# ----------------- Run Section -----------------
+
+include "annealing.in.run"
