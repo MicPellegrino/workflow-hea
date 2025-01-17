@@ -31,3 +31,7 @@
 	boundary p p p
 
 # !!! Either change b.c. or add walls along z direction !!!
+
+# Some dummy fixes to compute non-existing properties
+	fix df1 all property/atom mol
+	fix df2 all property/atom q

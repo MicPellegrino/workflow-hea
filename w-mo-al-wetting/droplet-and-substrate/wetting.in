@@ -15,6 +15,10 @@ read_data "annealed_surface_WMo.data" add append offset 1 0 0 0 0
 
 include "wetting.in.settings"
 
+# Define groups for substrate and wetting atoms 
+	group liquid type 1     # Al
+	group solid type 2 3    # W Mo
+
 # ----------------- Run Section -----------------
 
 # Energy minimization
