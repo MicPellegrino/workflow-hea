@@ -10,7 +10,6 @@
 
 
 
-
 # ----- DETAILS -----
 	echo            log
 	log             ${run}.log
@@ -19,8 +18,8 @@
 # Styles
 	units        metal
 	atom_style   atomic
-	# pair_style   eam/alloy	# CPU
-	pair_style   eam/alloy/gpu	# GPU
+	pair_style   eam/alloy			# CPU
+	# pair_style   eam/alloy/gpu	# GPU
 
 # Neighbour list
 	neighbor        2.0 bin

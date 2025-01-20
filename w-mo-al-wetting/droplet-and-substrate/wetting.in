@@ -1,5 +1,5 @@
 # When running on GPU
-package gpu 1
+# package gpu 1
 
 # ----------------- Init Section -----------------
 
@@ -8,7 +8,7 @@ include "wetting.in.init"
 
 # ----------------- Atom Definition Section -----------------
 
-read_data "droplet_Al-transformed.data"
+read_data "droplet_Al-transformed.data" extra/atom/types 2
 read_data "annealed_surface_WMo.data" add append offset 1 0 0 0 0 
 
 # ----------------- Settings Section -----------------

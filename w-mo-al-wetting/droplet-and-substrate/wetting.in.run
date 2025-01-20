@@ -4,20 +4,18 @@
 	thermo_modify   flush yes
 
 # Dump configuration
-	# dump   		d1 all custom 5000 wetting.dump id type x y z xu yu zu vx vy vz
 	
 	# Dump style with a 'placeholder' variable for molecules
 	variable 	dummyMol atom "gmask(liquid)+2.0*gmask(solid)"
 
-	dump 		d1 all custom 5000 wetting.dump id v_dummyMol type q x y z vx vy vz
+	dump 		d1 all custom 1000 wetting.dump id v_dummyMol type q x y z vx vy vz
 	
 	dump_modify	d1 element Al W Mo
 
 # ----- INITIAL EQUILIBRATION AT Tlow -----
 	velocity        all create ${T} 872392 dist gaussian
 	fix             feq all nvt temp ${T} ${T} ${tdamp}
-	# run           1000000   # 1 ns
-	run             100000   # 100 ps
+	run           	200000 		# 200 ps
 	unfix           feq
 
 
