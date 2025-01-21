@@ -1,0 +1,23 @@
+# Simulating only the cooling step
+
+# ----------------- Init Section -----------------
+
+variable tcool  equal 5
+variable ncool  equal ${tcool}*1000000
+variable run  string annealing_Co-Fe-Ni_${tcool}
+
+include "annealing.in.init"
+
+# ----------------- Atom Definition Section -----------------
+
+# read_data "../minimization/system_Co-Fe-Ni_en_min.data"
+read_data "molten_Co-Fe-Ni.data"
+
+# ----------------- Settings Section -----------------
+
+include "annealing.in.settings"
+
+# ----------------- Run Section -----------------
+
+# include "annealing.in.run"
+include "annealing_cooling.in.run"

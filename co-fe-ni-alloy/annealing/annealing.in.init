@@ -1,10 +1,6 @@
 # ----- VARIABLES -----
-	variable Ti     equal 300     # Initial temperature (K)
+	variable Tlow 	equal 300     # Initial temperature (K)
 	variable Thigh  equal 3300    # High temperature for annealing (K)
-	variable Tfinal equal 300     # Final temperature after cooling (K)
-	variable Tstep  equal 500     # Cooling step (K) per stage (Thigh - Tstep - Tstep - ...)
-	variable delT   equal ${Thigh}-${Tfinal}
-	variable nsteps equal ceil(v_delT/v_Tstep) # Number of cooling steps
 	variable Toutput equal temp
 
 
@@ -14,12 +10,20 @@
 
 
 # Pressure
-	variable pressh  equal 100.0
-	variable pressc  equal 1.0
+	variable Phigh  equal 1.0
+	variable Plow  	equal 0.0
+
+
+# Heating and cooling time
+# REMOVE THE COOLING TIME A ND PUT IT IN THE .in FILE
+	variable theat	equal 5
+	variable nheat  equal ${theat}*1000000
+	variable tcool	equal 5
+	variable ncool  equal ${tcool}*1000000
 
 
 # Output name files
-	variable run  string annealing_Co-Fe-Ni
+#	variable run  string annealing_Co-Fe-Ni_${tcool}
 
 
 
@@ -32,7 +36,7 @@
 # Styles
 	units        metal
 	atom_style   atomic
-	pair_style   eam/alloy/gpu
+	pair_style   eam/alloy
 
 # Neighbour list
 	neighbor        2.0 bin
