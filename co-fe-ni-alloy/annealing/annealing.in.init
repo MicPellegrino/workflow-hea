@@ -15,17 +15,8 @@
 
 
 # Heating and cooling time
-# REMOVE THE COOLING TIME A ND PUT IT IN THE .in FILE
 	variable theat	equal 5
 	variable nheat  equal ${theat}*1000000
-	variable tcool	equal 5
-	variable ncool  equal ${tcool}*1000000
-
-
-# Output name files
-#	variable run  string annealing_Co-Fe-Ni_${tcool}
-
-
 
 
 # ----- DETAILS -----
