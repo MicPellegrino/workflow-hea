@@ -2,7 +2,7 @@
 
 # ----------------- Init Section -----------------
 
-variable tcool	equal 8
+variable tcool	equal 1
 variable ncool	equal ${tcool}*1000000
 variable run 	string annealing_Co-Fe-Ni_${tcool}
 
