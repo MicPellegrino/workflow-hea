@@ -32,7 +32,7 @@ mod2 = AffineTransformationModifier(operate_on = {'cell'},
 pipeline_droplet.modifiers.append(mod2)
 data_droplet = pipeline_droplet.compute()
 
-dz = 27.5
+dz = 23
 mod2 = AffineTransformationModifier(operate_on = {'particles'},
                                 transformation = [  [1, 0, 0, 0],
                                                     [0, 1, 0, 0],

@@ -19,10 +19,13 @@ include "wetting.in.settings"
 	group liquid type 1     # Al
 	group solid type 2 3    # W Mo
 
+	write_data wetting_test.data
+
 # ----------------- Run Section -----------------
 
 # Energy minimization
     minimize 1.0e-4 1.0e-6 100 1000
+
     reset_timestep 0
 
 include "wetting.in.run"
