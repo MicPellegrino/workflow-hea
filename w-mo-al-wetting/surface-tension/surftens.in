@@ -1,0 +1,42 @@
+variable nxy equal 4
+variable nz equal 4
+# variable path string "slab_${nxy}_${nz}"
+# variable infile string "${path}/slab_Al.data"
+
+units           metal
+boundary        p p p
+atom_style      atomic
+
+read_data	    slab_${nxy}_${nz}/slab_Al.data
+
+variable Teq equal 	1200
+variable Toutput equal 	temp
+variable SurfTens equal "0.5*lz*(pzz-0.5*(pxx+pyy))"
+
+neighbor    	2.0 bin
+neigh_modify	check yes
+
+pair_style 	eam/alloy
+pair_coeff * * ../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al
+
+
+###
+
+dump dp1 all atom 5000 slab_${nxy}_${nz}/surftens.dump
+
+thermo          1000
+thermo_style    custom step temp press pe ke etotal lz pxx pyy pzz v_SurfTens
+thermo_modify   flush yes
+
+fix myat1 all ave/time 10 100 1000 v_Toutput file slab_${nxy}_${nz}/temperature.dat
+fix myat2 all ave/time 10 100 1000 v_SurfTens file slab_${nxy}_${nz}/surftens.dat
+
+###
+
+
+velocity all create ${Teq} 123918 rot yes mom yes dist gaussian
+fix mynvt1 all nvt temp ${Teq} ${Teq} 1.0
+timestep 	0.001
+run 		1000000
+
+write_data      slab_${nxy}_${nz}/slab_Al_fin.data

@@ -1,0 +1,57 @@
+variable fccAl equal 4.0493
+
+variable nxy equal 4
+variable nz equal 4
+
+variable Las equal ${fccAl}*${nxy}
+variable Lah equal ${fccAl}*${nz}
+
+variable Lx equal ${Las}
+variable Ly equal ${Las}
+variable Lz equal ${Lah}*3
+
+# Initial and final temperatures
+variable Ti equal 300
+variable Tf equal 1200
+
+units metal
+boundary p p p
+atom_style atomic
+
+region system block -${Lx} ${Lx} -${Ly} ${Ly} -${Lz} ${Lz}
+region cube block -${Las} ${Las} -${Las} ${Las} -${Lah} ${Lah}
+create_box 1 system
+
+pair_style eam/alloy
+pair_coeff * * ../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al
+
+lattice fcc ${fccAl}
+create_atoms 1 region cube
+lattice none 1.0
+
+minimize 1.0e-4 1.0e-6 100 1000
+write_data	slab_${nxy}_${nz}/slab_Al_min.data
+
+reset_timestep 0
+
+dump dp1 all atom 1000 slab_${nxy}_${nz}/preparation.dump
+
+thermo 1000
+thermo_style    custom step temp press pe ke etotal vol density
+thermo_modify   flush yes
+
+# velocity all create ${Ti} 123918 rot yes mom yes dist gaussian
+
+# Melting
+fix mynvt1 all nvt temp ${Ti} ${Tf} 0.1
+timestep 0.001
+
+run 500000  # 500 ps
+
+# Equilibrating
+unfix mynvt1
+fix mynvt2 all nvt temp ${Tf} ${Tf} 1.0
+
+run 500000  # 500 ps
+
+write_data  slab_${nxy}_${nz}/slab_Al.data
