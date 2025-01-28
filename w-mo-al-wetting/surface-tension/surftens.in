@@ -1,5 +1,5 @@
-variable nxy equal 4
-variable nz equal 4
+variable nxy equal 8
+variable nz equal 2
 # variable path string "slab_${nxy}_${nz}"
 # variable infile string "${path}/slab_Al.data"
 
@@ -37,6 +37,7 @@ fix myat2 all ave/time 10 100 1000 v_SurfTens file slab_${nxy}_${nz}/surftens.da
 velocity all create ${Teq} 123918 rot yes mom yes dist gaussian
 fix mynvt1 all nvt temp ${Teq} ${Teq} 1.0
 timestep 	0.001
-run 		1000000
+# run 		1000000
+run		200000
 
 write_data      slab_${nxy}_${nz}/slab_Al_fin.data
