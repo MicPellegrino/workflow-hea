@@ -1,0 +1,38 @@
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic
+atom_modify map array
+
+# Fraction of each atomic component
+variable fCo equal 0.333
+variable fFe equal 0.333
+variable fNi equal 0.334
+
+# Lattice parameter for WMo after annealing [Å]
+variable fccFeNi equal 3.58
+
+lattice fcc ${fccFeNi}
+region box block 0 1 0 1 0 1 units lattice 
+create_box 3 box 
+create_atoms 1 box 
+replicate 4 4 4 
+
+labelmap atom 1 Co 2 Fe 3 Ni
+set type 1 type/fraction 2 $(v_fNi+v_fFe) 1234567
+set type 2 type/fraction 3 $((v_fFe)/(v_fNi+v_fFe)) 1234566
+
+pair_style eam/alloy 
+pair_coeff * * ../potential-files/eam/FeNiCrCoCu-with-ZBL.eam.alloy Co Fe Ni
+neighbor 2.0 bin
+neigh_modify delay 0 every 1 check yes
+
+write_data co_fe_ni.data
+
+# Energy minimization
+# fix 1 all box/relax iso 0.0 vmax 0.001  
+# thermo 10 
+# thermo_style custom step pe lx ly lz press 
+# min_style cg 
+# minimize 1e-25 1e-25 5000 10000
+# write_data co_fe_ni.xyz
