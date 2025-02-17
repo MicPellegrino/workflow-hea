@@ -1,0 +1,68 @@
+variable T equal 1200
+
+# Thermostat damping time (ps)
+# Should be larger than the velocity decorrelation time
+variable tdamp equal 5.0    # thermostat damping (ps)
+
+# Dumping frequency of pressure components
+variable p equal 100        # correlation length (time?)
+variable s equal 5          # sample interval
+variable d equal $p*$s      # dump interval
+
+# Boltzmann constant in bar*(A^3)/K
+variable kB equal 138.0649
+
+thermo $d
+
+# Output name files
+variable run  string viscosity_Al
+
+echo log
+log ${run}.log
+
+units        metal
+atom_style   atomic
+pair_style   eam/alloy
+
+neighbor        2.0 bin
+neigh_modify    check yes
+
+boundary p p p
+
+read_data "molten_Al.data"
+
+include parm.lammps
+
+fix mynvt all nvt temp ${T} ${T} ${tdamp}
+timestep 0.001
+
+# Time average of pressure components
+variable pxy equal pxy
+variable pxz equal pxz
+variable pyz equal pyz
+fix avstress all ave/time $s $p $d v_pxy v_pxz v_pyz ave one file pressure-components.dat
+
+# Increments of the integral squared of the off-diagon pressure componenets
+# (can be generalized to include diagonal components too)
+variable scale equal vol/(6.0*$T*${kB}*dt*$d)
+variable deltasqxy equal (f_avstress[1]*$d*dt)^2
+variable deltasqxz equal (f_avstress[2]*$d*dt)^2
+variable deltasqyz equal (f_avstress[3]*$d*dt)^2
+
+fix avdeltasq all ave/time $d 1 $d v_deltasqxy v_deltasqxz v_deltasqyz ave running file eistein-average.dat
+
+variable vxy equal f_avdeltasq[1]*${scale}
+variable vxz equal f_avdeltasq[2]*${scale}
+variable vyz equal f_avdeltasq[3]*${scale}
+
+thermo_style custom step temp pe press pxy v_vxy v_vxz v_vyz
+
+run 2500000 # 2.5 ns
+
+variable eta equal (v_vxy+v_vxz+v_vyz)
+
+# Conversion from bat*ps to cP
+variable conv equal 1e-4
+variable etaconv equal v_eta*v_conv
+
+print "running average viscosity: ${etaconv}"

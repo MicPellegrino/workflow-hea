@@ -1,0 +1,52 @@
+variable T equal 1200
+
+# Thermostat damping time (ps)
+# Should be larger than the velocity decorrelation time
+variable tdamp equal 5.0    # thermostat damping (ps)
+
+# Total and averaging steps
+variable Ntot equal 10000000    # 10 ns
+variable Nave equal 1000000     # 1 ns
+
+# Output name files
+variable run  string viscosity_Al
+
+echo log
+log ${run}.log
+
+units        metal
+atom_style   atomic
+pair_style   eam/alloy
+
+neighbor        2.0 bin
+neigh_modify    check yes
+
+boundary p p p
+
+read_data "molten_Al.data"
+change_box all triclinic
+
+include parm.lammps
+
+# Velocity of top edge
+variable srate equal 1e-2
+variable xzrate equal ${srate}/lz
+
+fix	1 all nvt/sllod temp ${T} ${T} ${tdamp}
+fix	2 all deform 1 xz erate ${xzrate} remap v
+
+timestep 0.001
+
+# Conversion from bat*ps to cP
+variable conv equal 1e-4
+
+variable visc equal -v_conv*pxz/v_xzrate
+fix	vave all ave/time 10 100 1000 v_visc ave running start ${Nave}
+
+compute	tilt all temp/deform
+
+thermo 1000
+thermo_style custom step temp press pxz v_visc f_vave
+thermo_modify temp tilt
+
+run ${Ntot}

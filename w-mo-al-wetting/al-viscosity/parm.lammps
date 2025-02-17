@@ -1,0 +1,2 @@
+pair_style eam/alloy
+pair_coeff * * ../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al
