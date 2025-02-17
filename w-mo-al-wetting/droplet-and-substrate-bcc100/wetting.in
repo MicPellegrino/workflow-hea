@@ -28,7 +28,7 @@ include "wetting.in.settings"
 
     reset_timestep 0
 
-# include "wetting.in.run"
+include "wetting.in.run"
 # include "wetting.in.time"
 
 write_data      wetting_Al_WMo.data

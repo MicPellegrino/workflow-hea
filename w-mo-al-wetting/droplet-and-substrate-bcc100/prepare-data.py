@@ -9,7 +9,8 @@ from copy import deepcopy
 # Set shift_z to a different number and/or
 # define a shift (new mod) for the substrate too
 scale_z = 0.75
-shift_z = 23
+shift_z_droplet = 23
+shift_z_substrate = 23
 
 pipeline_droplet = import_file("droplet_Al.data")
 pipeline_substrate = import_file("annealed_surface_WMo.data")
@@ -70,7 +71,7 @@ data_droplet = pipeline_droplet.compute()
 mod3 = AffineTransformationModifier(operate_on = {'particles'},
                                 transformation = [[1, 0, 0, 0],
                                                   [0, 1, 0, 0],
-                                                  [0, 0, 1, -shift_z]])
+                                                  [0, 0, 1, -shift_z_droplet]])
 pipeline_droplet.modifiers.append(mod3)
 data_droplet = pipeline_droplet.compute()
 
@@ -87,6 +88,13 @@ mod4 = AffineTransformationModifier(transformation = [[1, 0, 0, -substrate_cell_
                                                   [0, 1, 0, -substrate_cell_0[1,3]],
                                                   [0, 0, 1, -substrate_cell_0[2,3]]])
 pipeline_substrate.modifiers.append(mod4)
+data_substrate = pipeline_substrate.compute()
+
+mod5 = AffineTransformationModifier(operate_on = {'particles'},
+                                transformation = [[1, 0, 0, 0],
+                                                  [0, 1, 0, 0],
+                                                  [0, 0, 1, -shift_z_substrate]])
+pipeline_substrate.modifiers.append(mod5)
 data_substrate = pipeline_substrate.compute()
 
 substrate_cell_1 = deepcopy(data_substrate.cell[...])
