@@ -1,0 +1,11 @@
+# ----- SETTINGS -----
+
+# Replicate box to produce a substrate on the xz plane
+# replicate 4 1 5
+
+# Forcefield
+	pair_coeff * * ../../potential-files/eam/W-Mo.eam.fs W Mo
+
+# Collection of atoms
+	group alloy type  1 2
+	

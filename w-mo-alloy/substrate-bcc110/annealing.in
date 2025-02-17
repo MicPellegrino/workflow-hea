@@ -1,0 +1,17 @@
+# ----------------- Init Section -----------------
+
+include "annealing.in.init"
+
+
+# ----------------- Atom Definition Section -----------------
+
+read_data "system_w_mo_min.data"
+
+# ----------------- Settings Section -----------------
+
+include "annealing.in.settings"
+
+# ----------------- Run Section -----------------
+
+include "annealing.in.run"
+# include "annealing_timing.in.run"

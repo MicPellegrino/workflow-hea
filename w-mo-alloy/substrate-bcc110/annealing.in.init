@@ -1,0 +1,32 @@
+# ----- VARIABLES -----
+	variable Tlow 		equal 300     # Initial temperature (K)
+	variable Thigh  	equal 2500    # High temperature for annealing (K)
+	variable Toutput 	equal temp
+
+
+# Fixed time parameters
+	variable tdamp  equal 1.0     # Thermostat damping (ps)
+
+# Output name files
+	variable run  string annealing_W-Mo
+
+
+
+
+# ----- DETAILS -----
+	echo            log
+	log             ${run}.log
+
+
+# Styles
+	units        metal
+	atom_style   atomic
+	pair_style   eam/fs
+
+# Neighbour list
+	neighbor        2.0 bin
+	neigh_modify    check yes
+
+
+# Boundary conditions
+	boundary p p p

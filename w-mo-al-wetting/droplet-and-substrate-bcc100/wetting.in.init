@@ -1,0 +1,36 @@
+# ----- VARIABLES -----
+	variable T 		    equal 1200     # Initial temperature (K)
+
+
+# Fixed time parameters
+	variable tdamp  equal 0.1     # Thermostat damping (ps)
+
+# Output name files
+	variable run  string wetting_Al_WMo
+
+
+
+# ----- DETAILS -----
+	echo            log
+	log             ${run}.log
+
+
+# Styles
+	units        metal
+	atom_style   atomic
+	pair_style   eam/alloy			# CPU
+	# pair_style   eam/alloy/gpu	# GPU
+
+# Neighbour list
+	neighbor        2.0 bin
+	neigh_modify    check yes
+
+
+# Boundary conditions
+	boundary p p p
+
+# !!! Either change b.c. or add walls along z direction !!!
+
+# Some dummy fixes to compute non-existing properties
+	fix df1 all property/atom mol
+	fix df2 all property/atom q

@@ -1,0 +1,51 @@
+# Thermo output
+	thermo          1000
+	thermo_style    custom step temp press pe ke etotal vol density
+	thermo_modify   flush yes
+
+# Dump configuration
+	# dump 			dmp all custom 50000 dump.lammpstrj id type x y z xu yu zu vx vy vz # Alternative output file format
+	dump            d1 all custom 50000 annealed_system.dump id type x y z xu yu zu vx vy vz
+	dump_modify     d1 element W Mo
+
+# Output temperature
+	fix myat1 all ave/time 10 100 5000 v_Toutput file temperature.dat
+
+
+# ----- INITIAL EQUILIBRATION AT Tlow -----
+	velocity        all create ${Tlow} 872392 dist gaussian
+	fix             feq all nvt temp ${Tlow} ${Tlow} ${tdamp}
+	run             500000   # 500 ps
+	# run           50000
+	unfix           feq
+
+
+# ----- HEATING FROM Tlow TO Thigh -----
+	fix             fheat all nvt temp ${Tlow} ${Thigh} ${tdamp}
+	run             2000000   # 2 ns
+	# run           200000
+	unfix           fheat
+
+
+# ----- HOLD AT Thigh -----
+	fix             fholdhigh all nvt temp ${Thigh} ${Thigh} ${tdamp}
+	run             2000000   # 2 ns
+	# run           200000
+	unfix           fholdhigh
+
+# ----- COOLING FROM Thigh TO Tlow -----
+	fix             fcool all nvt temp ${Thigh} ${Tlow} ${tdamp}
+	run             2000000   # 2 ns
+	# run           200000
+	unfix           fcool
+
+# ----- HOLD AT Tfinal -----
+	fix             ffinal all nvt temp ${Tlow} ${Tlow} ${tdamp}
+	run             500000   # 500 ps
+	# run           50000 
+	unfix           ffinal
+
+
+# ----- FINAL OUTPUT -----
+	write_data      annealed_surface_W-Mo.data
+
