@@ -1,0 +1,59 @@
+variable T equal 1200
+
+# Thermostat damping time (ps)
+# Should be larger than the velocity decorrelation time
+variable tdamp equal 1.0    # thermostat damping (ps)
+
+# Total and averaging steps
+variable Ntot equal 100000000   # 100 ns
+variable Nave equal 1000000     # 1 ns
+
+# Velocity of top edge
+variable srate equal 1e-1
+variable xzrate equal ${srate}/lz
+# Output name files
+variable run  string viscosity_Al_1em1
+
+echo log
+log ${run}.log
+
+units        metal
+atom_style   atomic
+pair_style   eam/alloy
+
+neighbor     2.0 bin
+neigh_modify check yes
+
+boundary p p p
+
+read_data "../molten_Al.data"
+change_box all triclinic
+
+pair_style eam/alloy
+pair_coeff * * ../../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al
+
+fix 1 all nvt/sllod temp ${T} ${T} ${tdamp}
+fix 2 all deform 1 xz erate ${xzrate} remap v
+
+# Flow profile
+# compute layers all chunk/atom bin/1d z center 0.05 units reduced
+# fix flowfield all ave/chunk 10 10000 100000 layers vx & 
+#     file flow-profile.dat
+
+timestep 0.001
+
+### Conversion from bat*ps to cP (DO NOT CHANGE!) ###
+variable conv equal 1e-4
+### --------------------------------------------- ###
+
+variable visc equal -v_conv*pxz/v_xzrate
+fix	vave all ave/time 10 100 5000 v_visc ave running start ${Nave} &
+    file visco-deform-1em1.dat
+
+compute	tilt all temp/deform
+
+thermo 5000
+thermo_style custom step temp press pxz v_visc f_vave
+thermo_modify temp tilt
+
+run ${Ntot}
