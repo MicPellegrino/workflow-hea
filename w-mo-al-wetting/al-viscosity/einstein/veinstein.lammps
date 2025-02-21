@@ -4,19 +4,24 @@ variable T equal 1200
 # Should be larger than the velocity decorrelation time
 variable tdamp equal 5.0        # thermostat damping (ps)
 
-variable Nrun equal 10000000    # 10 ns
+variable Nrun equal 10000000    # 1 ns
 
-# Dumping frequency of pressure components
-variable p equal 500        # correlation length (time?)
-variable s equal 1          # sample interval
-variable d equal $p*$s      # dump interval
+# Dumping frequency of stress components
+variable s      equal 5             # stress sampling
+variable p      equal 10            # no. stress values per average
+variable d      equal $p*$s         # stress average window
+variable nd     equal 20            # no. integral compute values
+variable kd     equal ${nd}*${d}    # integral average output window
+variable td     equal 10*${kd}      # thermo dumping
 
 # Boltzmann constant in bar*(A^3)/K
 variable kB equal 138.0649
+# Conversion factors (bar->Pa, ps->s, ...)
+variable conv1 equal 1e-4
+variable conv2 equal 1e4
 
 # Output name files
 variable run  string viscosity_Al
-
 echo log
 log ${run}.log
 
@@ -38,7 +43,7 @@ fix mynvt all nvt temp ${T} ${T} ${tdamp}
 timestep 0.001
 
 # Time average of pressure components
-variable diagfac equal 4/3
+variable invdiagfac equal 0.75
 variable pxy equal pxy
 variable pxz equal pxz
 variable pyz equal pyz
@@ -46,46 +51,58 @@ variable pxx equal pxx-press
 variable pyy equal pyy-press
 variable pzz equal pzz-press
 
-fix avstress all ave/time $s $p $d v_pxy v_pxz v_pyz v_pxx v_pyy v_pzz ave one & 
-    file pressure-components.dat
+# TEST: use trap() to calculate the integral
+fix pxyvec all vector $s v_pxy
+fix pxzvec all vector $s v_pxz
+fix pyzvec all vector $s v_pyz
+fix pxxvec all vector $s v_pxx
+fix pyyvec all vector $s v_pyy
+fix pzzvec all vector $s v_pzz
 
-# Increments of the integral squared of the off-diagon pressure componenets
-# (can be generalized to include diagonal components too)
-variable scale equal vol/(2.0*$T*${kB}*dt*$d)
-variable deltasqxy equal (f_avstress[1]*$d*dt)^2
-variable deltasqxz equal (f_avstress[2]*$d*dt)^2
-variable deltasqyz equal (f_avstress[3]*$d*dt)^2
-variable deltasqxx equal (f_avstress[4]*$d*dt)^2/${diagfac}
-variable deltasqyy equal (f_avstress[5]*$d*dt)^2/${diagfac}
-variable deltasqzz equal (f_avstress[6]*$d*dt)^2/${diagfac}
+variable eintxy equal ${conv1}*dt*$s*trap(f_pxyvec)
+variable eintxz equal ${conv1}*dt*$s*trap(f_pxzvec)
+variable eintyz equal ${conv1}*dt*$s*trap(f_pyzvec)
+variable eintxx equal ${conv1}*dt*$s*trap(f_pxxvec)
+variable eintyy equal ${conv1}*dt*$s*trap(f_pyyvec)
+variable eintzz equal ${conv1}*dt*$s*trap(f_pzzvec)
+variable eintmm equal (v_eintxy+v_eintxz+v_eintyz+v_eintxx+v_eintyy+v_eintzz)/6
 
-variable nd equal 10            # frequancy of viscosity compute
-variable kd equal ${nd}*${d}    # frequancy of viscosity dump
-variable td equal 2*${kd}       # thermo dumping
+fix aveint all ave/time $d ${nd} ${kd} v_eintxy v_eintxz v_eintyz v_eintxx v_eintyy v_eintzz v_eintmm ave one &
+    file eint.dat
 
-fix avdeltasq all ave/time $d ${nd} ${kd} v_deltasqxy v_deltasqxz v_deltasqyz v_deltasqxx v_deltasqyy v_deltasqzz ave running & 
-    file einstein-average.dat
+variable eint2xy equal v_eintxy^2
+variable eint2xz equal v_eintxz^2
+variable eint2yz equal v_eintyz^2
+variable eint2xx equal ${invdiagfac}*v_eintxx^2
+variable eint2yy equal ${invdiagfac}*v_eintyy^2
+variable eint2zz equal ${invdiagfac}*v_eintzz^2
+variable eint2mm equal (v_eint2xy+v_eint2xz+v_eint2yz+v_eint2xx+v_eint2yy+v_eint2zz)/6
 
-# Conversion from bat*ps to cP
-variable conv equal 1e-4
-
-variable vxy equal ${conv}*f_avdeltasq[1]*${scale}
-variable vxz equal ${conv}*f_avdeltasq[2]*${scale}
-variable vyz equal ${conv}*f_avdeltasq[3]*${scale}
-variable vxx equal ${conv}*f_avdeltasq[4]*${scale}
-variable vyy equal ${conv}*f_avdeltasq[5]*${scale}
-variable vzz equal ${conv}*f_avdeltasq[6]*${scale}
+fix aveint2 all ave/time $d ${nd} ${kd} v_eint2xy v_eint2xz v_eint2yz v_eint2xx v_eint2yy v_eint2zz v_eint2mm ave one &
+    file eint2.dat
 
 # Computing VACF to check if the sampling and the thermostat coupling time are reasonable
 # compute velacc all vacf
 # fix avacf all ave/time 1 1 10 c_velacc[4] & 
 #     file avcf.dat
 
+variable eps equal 1e-3
+variable scale equal ${conv2}*vol/(2.0*$T*${kB}*(step+${eps})*dt)
+
+variable vxy equal v_eint2xy*v_scale
+variable vxz equal v_eint2xz*v_scale
+variable vyz equal v_eint2yz*v_scale
+variable vxx equal v_eint2xx*v_scale
+variable vyy equal v_eint2yy*v_scale
+variable vzz equal v_eint2zz*v_scale
+variable eta equal (v_vxy+v_vxz+v_vyz+v_vxx+v_vyy+v_vzz)/6
+
+fix aveeta all ave/time $d ${nd} ${kd} v_vxy v_vxz v_vyz v_vxx v_vyy v_vzz v_eta ave one &
+    file viscosity.dat
+
 thermo ${td}
-thermo_style custom step temp pe press v_vxy v_vxz v_vyz v_vxx v_vyy v_vzz
+thermo_style custom step temp pe press v_vxy v_vxz v_vyz v_vxx v_vyy v_vzz v_eta
 
 run ${Nrun}
-
-variable eta equal (v_vxy+v_vxz+v_vyz+v_vxx+v_vyy+v_vzz)/6
 
 print "running average viscosity: ${eta}"
