@@ -1,0 +1,61 @@
+variable aTi equal 2.9505
+variable cTi equal 4.6833
+
+variable a11 equal 0.5*${aTi}
+variable a12 equal -0.8660254037844387*${aTi}
+variable a21 equal 0.5*${aTi}
+variable a22 equal 0.8660254037844387*${aTi}
+
+variable b1 equal 1/3
+variable b2 equal 2/3
+variable b3 equal 1/2
+
+variable Lx equal 108.05964079870328
+variable Ly equal 100.44784059225
+variable Lz equal 108.05964079870328
+variable Lin equal ${cTi}*7
+
+# Initial and final temperatures
+variable Ti equal 300
+variable Tf equal 2000
+
+units metal
+boundary p p p
+atom_style atomic
+
+region system block -${Lx} ${Lx} -${Ly} ${Ly} -${Lz} ${Lz}
+region cube block -${Lin} ${Lin} -${Lin} ${Lin} -${Lin} ${Lin}
+create_box 1 system
+
+pair_style eam/alloy/gpu
+pair_coeff * * ../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Ti
+
+lattice custom 1 a1 ${a11} ${a12} 0.0 a2 ${a21} ${a22} 0.0 a3 0.0 0.0 ${cTi} &
+    basis 0.0 0.0 0.0 basis ${b1} ${b2} ${b3}
+create_atoms 1 region cube
+lattice none 1.0
+
+minimize 1.0e-4 1.0e-6 100 1000
+reset_timestep 0
+
+dump dp1 all atom 5000 dump-ti.lammpstrj
+
+thermo 1000
+thermo_style    custom step temp press pe ke etotal vol density
+thermo_modify   flush yes
+
+velocity all create ${Ti} 123918 rot yes mom yes dist gaussian
+
+# Melting
+fix mynvt1 all nvt temp ${Ti} ${Tf} 1.0
+timestep 0.001
+
+run 900000  # 900 ps
+
+# Equilibrating
+unfix mynvt1
+fix mynvt2 all nvt temp ${Tf} ${Tf} 1.0
+
+run 100000  # 100 ps
+
+write_data  droplet_Ti.data

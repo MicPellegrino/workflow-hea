@@ -1,0 +1,31 @@
+# Temperature
+variable T0 equal 2000
+
+units metal
+boundary p p p
+atom_style atomic
+
+read_data "droplet_AlTi.data"
+labelmap atom 1 Al 2 Ti
+
+pair_style eam/alloy/gpu
+pair_coeff * * ../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al Ti
+
+minimize 1.0e-4 1.0e-6 100 1000
+reset_timestep 0
+
+dump dp1 all atom 5000 dump.lammpstrj
+
+thermo 1000
+thermo_style    custom step temp press pe ke etotal vol density
+thermo_modify   flush yes
+
+velocity all create ${T0} 123918 rot yes mom yes dist gaussian
+
+# Equilibration
+fix mynvt1 all nvt temp ${T0} ${T0} 1.0
+timestep 0.001
+
+run 100000  # 100 ps
+
+write_data  droplet_AlTi_eq.data
