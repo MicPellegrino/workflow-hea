@@ -2,7 +2,7 @@
 variable T equal 2000
 
 # Files
-variable foln string "000"
+variable foln string "060"
 variable indata string "${foln}/molten_AlTi_eq.data"
 variable feint string "${foln}/eint.dat"
 
