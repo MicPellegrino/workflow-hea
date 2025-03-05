@@ -29,12 +29,12 @@ diag_fac = 0.75         # Factor for diagonal components
 num_sets = 6            # Number of stress components
 dt = 0.001              # Time step [ps]
 V = 4.27981**3          # Volume [nm^3]
-T = 1200                # Temperature [K]
+T = 2000                # Temperature [K]
 kB = (1e3)*138.0649     # kB [bar*nm^3/K]
 scale = V/(2.0*T*kB)
 
 # Reading .xvg output
-t, eint, nint = read_xvg('100/eint.dat')
+t, eint, nint = read_xvg('080/eint.dat')
 
 # Number of averaging blocks and restrarts for computing averages
 num_blocks = 10
