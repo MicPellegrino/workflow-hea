@@ -38,13 +38,13 @@ t, vol, nint = read_xvg('080/volume.dat')
 vol = np.array(vol[0])
 V = (1e-3)*np.mean(vol)     # Volume [nm^3]
 std_V = (1e-3)*np.std(vol)
-print("Box volume =", V, "+/-", std_V, "nm^3")
 
 scale = V/(2.0*T*kB)
 
 # Number of averaging blocks and restrarts for computing averages
 num_blocks = 10
-num_restarts = nint//(num_blocks*10)
+m = 10
+num_restarts = nint//(m*num_blocks)
 nint_block = nint//num_blocks+1
 step_size = max(nint_block//num_restarts,1)
 
@@ -73,26 +73,44 @@ for i in range(0, nint_block, step_size) :
             avint[num_sets][ii] += di/num_sets
     tint[ii] = dt*t[i]
 
+std_avint = np.std(avint[0:num_sets], axis=0)
+std_avint_p = std_avint/avint[num_sets]
+
 # Technically, the fit should be perfromed only between
 # the decorrelation time (ti) and the time of max prescribed
 # standard error (tf)
-ti = 400        # ps
+ti = 500        # ps
 tf = tint[-1]   # ps
 idx_ti = int(len(tint)*(ti/tint[-1]))
 idx_tf = int(len(tint)*(tf/tint[-1]))
 tfit = tint[idx_ti:idx_tf]
 
 p = np.polyfit(tfit,avint[num_sets][idx_ti:idx_tf],deg=1)
+p_low = np.polyfit(tfit,(1-std_avint_p[idx_ti:idx_tf])*avint[num_sets][idx_ti:idx_tf],deg=1)
+p_upp = np.polyfit(tfit,(1+std_avint_p[idx_ti:idx_tf])*avint[num_sets][idx_ti:idx_tf],deg=1)
 viscosity = scale*(1e6)*p[0]
+viscosity_p = np.abs(viscosity-scale*(1e6)*p_upp[0])
+viscosity_m = np.abs(viscosity-scale*(1e6)*p_low[0])
+viscosity_pm = 0.5*(viscosity_p+viscosity_m)
 
-print("# ----------------------- #")
-print("eta =", viscosity, "cP")
-print("# ----------------------- #")
+print("-----------------------------------------------------")
+print("Box volume =", V, "+/-", std_V, "nm^3")
+print("-----------------------------------------------------")
+print("eta =", viscosity, "+/-", viscosity_pm, "cP")
+print("-----------------------------------------------------")
 
-# for m in range(num_sets) :
-#     plt.plot(tint, avint[m])
-plt.plot(tint, avint[num_sets], 'ko')
-plt.plot(tfit, np.polyval(p,tfit), 'r-')
-plt.xlabel(r'$t$ [ps]')
-plt.ylabel(r'$I^2$ [cP$^2$]')
+fig, (ax1,ax2) = plt.subplots(1,2)
+
+ax1.plot(tint, avint[num_sets], 'ko')
+ax1.plot(tfit, np.polyval(p,tfit), 'r--',
+    linewidth=3)
+for jj in range(num_sets) :
+    ax1.plot(tint, avint[jj], 'b:')
+ax1.set_xlabel(r'$t$ [ps]')
+ax1.set_ylabel(r'$I^2$ [cP$^2$]')
+
+ax2.plot(tint[1:], std_avint_p[1:], 'b-')
+ax2.set_xlabel(r'$t$ [ps]')
+ax2.set_ylabel(r'$std(I^2)$ [$\%$]')
+
 plt.show()
