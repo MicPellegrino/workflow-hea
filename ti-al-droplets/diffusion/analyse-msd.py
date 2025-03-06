@@ -29,8 +29,8 @@ num_sets = 3            # Number of MSD components
 dt = 0.001              # Time step [ps]
 
 # Reading .xvg output
-# iframe, msd, n = read_xvg('000/msd-1.dat')
-iframe, msd, n = read_xvg('100/msd-2.dat')
+iframe, msd, n = read_xvg('000/msd-1.dat')
+# iframe, msd, n = read_xvg('100/msd-2.dat')
 
 t = [i*dt for i in iframe]
 
