@@ -32,8 +32,8 @@ T = 2000                # Temperature [K]
 kB = (1e3)*138.0649     # kB [bar*nm^3/K]
 
 # Reading .xvg output
-t, eint, nint = read_xvg('080/eint.dat')
-t, vol, nint = read_xvg('080/volume.dat')
+t, eint, nint = read_xvg('040/eint.dat')
+t, vol, nint = read_xvg('040/volume.dat')
 
 vol = np.array(vol[0])
 V = (1e-3)*np.mean(vol)     # Volume [nm^3]
@@ -101,16 +101,19 @@ print("-----------------------------------------------------")
 
 fig, (ax1,ax2) = plt.subplots(1,2)
 
-ax1.plot(tint, avint[num_sets], 'ko')
+ax1.plot(tint, avint[num_sets], 'k.')
 ax1.plot(tfit, np.polyval(p,tfit), 'r--',
     linewidth=3)
 for jj in range(num_sets) :
-    ax1.plot(tint, avint[jj], 'b:')
-ax1.set_xlabel(r'$t$ [ps]')
-ax1.set_ylabel(r'$I^2$ [cP$^2$]')
+    ax1.plot(tint, avint[jj], 'b:',
+    linewidth=0.75)
+ax1.set_xlabel(r'$t$ [ps]', fontsize=20)
+ax1.set_ylabel(r'$I^2$ [cP$^2$]', fontsize=20)
+ax1.set_xlim([tint[0], tint[-1]])
 
 ax2.plot(tint[1:], std_avint_p[1:], 'b-')
-ax2.set_xlabel(r'$t$ [ps]')
-ax2.set_ylabel(r'$std(I^2)$ [$\%$]')
+ax2.set_xlabel(r'$t$ [ps]', fontsize=20)
+ax2.set_ylabel(r'$std(I^2)$ [$\%$]', fontsize=20)
+ax2.set_xlim([tint[0], tint[-1]])
 
 plt.show()

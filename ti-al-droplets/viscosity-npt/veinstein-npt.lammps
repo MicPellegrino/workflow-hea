@@ -5,7 +5,7 @@ variable T equal 2000
 variable P equal 1
 
 # Files
-variable foln string "100"
+variable foln string "060"
 variable indata string "${foln}/molten_AlTi_eq.data"
 variable feint string "${foln}/eint.dat"
 variable fvol string "${foln}/volume.dat"
