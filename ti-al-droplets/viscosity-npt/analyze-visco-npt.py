@@ -32,8 +32,8 @@ T = 2000                # Temperature [K]
 kB = (1e3)*138.0649     # kB [bar*nm^3/K]
 
 # Reading .xvg output
-t, eint, nint = read_xvg('040/eint.dat')
-t, vol, nint = read_xvg('040/volume.dat')
+t, eint, nint = read_xvg('100/eint.dat')
+t, vol, nint = read_xvg('100/volume.dat')
 
 vol = np.array(vol[0])
 V = (1e-3)*np.mean(vol)     # Volume [nm^3]
