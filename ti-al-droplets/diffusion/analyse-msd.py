@@ -29,8 +29,9 @@ num_sets = 3            # Number of MSD components
 dt = 0.001              # Time step [ps]
 
 # Reading .xvg output
-iframe, msd, n = read_xvg('000/msd-1.dat')
-# iframe, msd, n = read_xvg('100/msd-2.dat')
+folder = '000'
+iframe, msd, n = read_xvg(folder+'/msd-1.dat')
+# iframe, msd, n = read_xvg(folder+'/msd-2.dat')
 
 t = [i*dt for i in iframe]
 
@@ -46,7 +47,7 @@ p = np.polyfit(tfit,msd[num_sets][idx_ti:idx_tf],deg=1)
 diff_coeff = p[0]/6
 
 print("# ----------------------- #")
-print("D =", diff_coeff, "A/ps")
+print("D =", diff_coeff, "A^2/ps")
 print("# ----------------------- #")
 
 # for m in range(num_sets) :

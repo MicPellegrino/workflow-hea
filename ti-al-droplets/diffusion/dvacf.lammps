@@ -3,11 +3,12 @@ variable T equal 2000
 
 # Files
 variable foln string "000"
+variable rep string "9"
 variable indata string "${foln}/molten_AlTi_eq.data"
-variable fvacf1 string "${foln}/vacf-1.dat"
-variable fvacf2 string "${foln}/vacf-2.dat"
-variable fivacf1 string "${foln}/ivacf-1.dat"
-variable fivacf2 string "${foln}/ivacf-2.dat"
+variable fvacf1 string "${foln}/vacf-1-${rep}.dat"
+variable fvacf2 string "${foln}/vacf-2-${rep}.dat"
+variable fivacf1 string "${foln}/ivacf-1-${rep}.dat"
+variable fivacf2 string "${foln}/ivacf-2-${rep}.dat"
 
 # Thermostat damping time (ps)
 # Should be larger than the velocity decorrelation time
@@ -15,7 +16,7 @@ variable tdamp equal 5.0
 # dimension factor (1d vs. 2d vs. 3d)
 variable dim_fac equal 1/3 
 
-variable Nrun equal 1000000     # 1 ns
+variable Nrun equal 250000 # 250 ps
 
 # Dumping frequency of stress components
 variable s      equal 1             # velocity sampling
@@ -69,4 +70,8 @@ fix aveIVacfTi all ave/time $d ${nd} ${kd} v_iVacfAl ave one &
 thermo ${td}
 thermo_style custom step temp pe press v_iVacfAl v_iVacfTi
 
+# dump dp1 all atom 5000 ${foln}/dummy-dump.lammpstrj
+
 run ${Nrun}
+
+write_data ${foln}/molten_AlTi_eq.data
