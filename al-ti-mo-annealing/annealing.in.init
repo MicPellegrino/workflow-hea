@@ -1,0 +1,37 @@
+# ----- VARIABLES -----
+	variable Tlow 	equal 300     # Initial temperature (K)
+	variable Toutput equal temp
+
+
+# Fixed time parameters
+	variable tdamp  equal 1.0     # Thermostat damping (ps)
+	variable pdamp  equal 5.0     # Barostat damping (ps)
+
+
+# Pressure
+	variable Phigh  equal 1.0
+	variable Plow  	equal 0.0
+
+
+# Heating and cooling time
+	variable theat	equal 5
+	variable nheat  equal ${theat}*1000000
+
+
+# ----- DETAILS -----
+	echo            log
+	log             ${run}.log
+
+
+# Styles
+	units        metal
+	atom_style   atomic
+	pair_style   eam/alloy
+
+# Neighbour list
+	neighbor        2.0 bin
+	neigh_modify    check yes
+
+
+# Boundary conditions
+	boundary p p p

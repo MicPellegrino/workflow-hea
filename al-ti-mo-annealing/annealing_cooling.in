@@ -1,0 +1,25 @@
+# Simulating only the cooling steps #
+
+# ----------------- Init Section -----------------
+
+variable tcool	equal 9
+variable ncool	equal ${tcool}*1000000
+variable run 	string annealing_AlMoTi_lt
+
+include "annealing.in.init"
+
+# ----------------- Atom Definition Section -----------------
+
+variable Thigh equal 1500
+read_data "molten_AlTiMo_lt.data"
+
+# variable Thigh equal 3570
+# read_data "molten_AlTiMo_ht.data"
+
+# ----------------- Settings Section -----------------
+
+include "annealing.in.settings"
+
+# ----------------- Run Section -----------------
+
+include "annealing_cooling.in.run"
