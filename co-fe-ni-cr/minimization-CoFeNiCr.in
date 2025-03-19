@@ -1,0 +1,80 @@
+# INITIALIZATION
+clear 
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic 
+atom_modify map array 
+
+# ATOM DEFINITION
+lattice fcc 2.658   # experimental lattice constant for CoFeNi   
+region box block 0 1 0 1 0 1 units lattice
+create_box 4 box
+create_atoms 1 box
+replicate 34 34 34
+
+# Set atom type ratios carefully for 25% each element
+set type 1 type/ratio 2 0.25000 12345
+set type 1 type/ratio 3 0.33333 12345
+set type 1 type/ratio 4 0.50000 12345
+
+
+# POTENTIAL
+pair_style eam/alloy 
+pair_coeff * * <POTENTIAL> Ni Fe Cr Co
+neighbor 2.0 bin 
+neigh_modify delay 0 every 1 check yes 
+
+# Reduce timestep 
+timestep 0.0005
+
+# COMPUTES
+compute eng all pe/atom 
+compute eatoms all reduce sum c_eng 
+
+# OUTPUT SETTINGS
+thermo 50
+thermo_style custom step temp pe ke etotal press vol lx ly lz atoms
+
+# Initial state
+write_data initial_system.data
+# dump myDump all custom 100 initial.dump id type x y z
+# dump_modify myDump element Ni Fe Cr Co
+
+
+#####################################################
+# ENERGY MINIMIZATION
+fix 1 all box/relax iso 0.0 vmax 0.001  
+thermo 10 
+thermo_style custom step pe lx ly lz press c_eatoms 
+min_style cg 
+minimize 1e-25 1e-25 5000 10000
+
+
+# COUNT ATOMS
+group nickel     type 1
+group iron       type 2
+group molybdenum type 3
+group cobalt     type 4
+
+variable nNi equal count(nickel)
+variable nFe equal count(iron)
+variable nMo equal count(molybdenum)
+variable nCo equal count(cobalt)
+
+print "Total number of atoms = $(count(all))"
+print "Number of Ni atoms = ${nNi}"
+print "Number of Fe atoms = ${nFe}"
+print "Number of Cr atoms = ${nMo}"
+print "Number of Co atoms = ${nCo}"
+
+# FINAL OUTPUT
+write_data final_system.data
+dump myDump2 all custom 1 final.dump id type x y z
+dump_modify myDump2 element Ni Fe Cr Co
+
+run 0
+
+
+
+
