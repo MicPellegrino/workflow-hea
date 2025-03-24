@@ -1,0 +1,20 @@
+# Generating a molten metal configuration to use
+# for testing the effect of the cooling rate
+
+# ----------------- Init Section -----------------
+
+variable run  string annealing_Co-Fe-Ni_heating
+include "annealing.in.init"
+
+# ----------------- Atom Definition Section -----------------
+
+read_data "../minimization/system_Co-Fe-Ni_en_min.data"
+
+# ----------------- Settings Section -----------------
+
+include "annealing.in.settings"
+
+# ----------------- Run Section -----------------
+
+# include "annealing.in.run"
+include "annealing_heating.in.run"
