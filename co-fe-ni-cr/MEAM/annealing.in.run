@@ -1,0 +1,108 @@
+# ============= COMPUTE E MONITORAGGIO =============
+compute pStress all stress/atom NULL
+compute pAvg all reduce max c_pStress[1] c_pStress[2] c_pStress[3]
+compute pAniso all pressure thermo_temp
+
+thermo 1000
+thermo_style custom step cpu temp pxx pyy pzz
+thermo_modify   flush yes
+
+# Dump configuration
+  dump            d1 all custom 50000 annealed_${1}-${2}-${3}-${4}.dump id type element x y z 
+  dump_modify     d1 element ${1} ${2} ${3} ${4}
+
+# ============= ENERGY MINIMIZATION =============
+fix 1 all box/relax iso 0.0 vmax 0.001  
+minimize 1e-25 1e-25 5000 10000 
+unfix 1
+write_data ${1}-${2}-${3}-${4}_en_min.data nocoeff
+
+# ============= ACKLAND COMPUTE =============
+
+  compute myAck all ackland/atom
+  variable Is0 atom "c_myAck == 0"
+  compute Count0 all reduce sum v_Is0
+  variable Frac0 equal "(c_Count0/atoms)*100.0"
+  variable Is1 atom "c_myAck == 1"
+  compute Count1 all reduce sum v_Is1
+  variable Frac1 equal "(c_Count1/atoms)*100.0"
+  variable Is2 atom "c_myAck == 2"
+  compute Count2 all reduce sum v_Is2
+  variable Frac2 equal "(c_Count2/atoms)*100.0"
+
+run 0
+print "Initial ACKLAND -> Unknown: ${Frac0}%"
+fix f1 all print 500 "Temp: $(temp)K, step: $(step) -- Unknow = ${Frac0} BCC = ${Frac1}, FCC = ${Frac2}" file akcland.txt screen no
+
+# ============= HEATING =============
+label heating_phase
+
+write_data heating_restart.begin
+
+velocity all create ${Tinitial} 123456
+
+label heating
+  fix fHeat all npt temp ${Tinitial} ${Thigh} 0.1 iso ${press} ${press} ${pdamp}
+  run 1000000
+  unfix fHeat
+
+label heating_hold
+  fix fHeat_hold all npt temp ${Thigh} ${Thigh} 0.1 iso ${press} ${press} ${pdamp}
+  run 300000
+  unfix fHeat_hold
+
+label heating_done
+print "Heating complete!"
+write_restart heating_restart.final
+
+
+
+# ============= ADAPTIVE COOLING =============
+
+label cooling_phase
+run 0
+variable T_current equal $(temp)
+write_data cooling_restart.data
+
+fix stopCheck all halt 1000 v_Frac0 < 40 error continue
+
+fix fCool all npt temp ${Thigh} ${Tinitial} ${tdamp} iso ${press} ${press} ${pdamp}
+
+# Esegui un run lungo; la simulazione verrà interrotta automaticamente se v_frac0 scende sotto il 40%
+run 3000000
+
+unfix stopCheck
+unfix fCool
+
+variable T_critical equal $(temp)
+
+label npt_aniso 
+
+  variable delT equal (${T_critical}-${Tinitial})/${nsteps}
+  variable i loop ${nsteps}
+  label loop_cool
+    variable Tstart equal ${T_critical}-(${i}-1)*${delT}
+    variable Tend   equal ${T_critical}-${i}*${delT}
+
+    fix  fcool all npt temp ${Tstart} ${Tend} ${tdamp} aniso ${press} ${press} ${pdamp}
+    run  500000    # 100 ps per cooling segment
+    unfix fcool
+    
+    fix fcool_hold all npt temp ${Tend} ${Tend} ${tdamp} aniso ${press} ${press} ${pdamp}
+    run 50000      # 50 ps holding temperature
+    unfix fcool_hold
+
+    next i
+  jump SELF loop_cool
+
+
+
+fix fCool_hold all npt temp ${Tinitial} ${Tinitial} ${tdamp} aniso ${press} ${press} ${pdamp}
+run 200000
+unfix fCool_hold
+
+
+label cooling_done
+print "Cooling complete!"
+write_data annealed.data
+ 

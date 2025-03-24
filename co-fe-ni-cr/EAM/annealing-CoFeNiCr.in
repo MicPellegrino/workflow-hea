@@ -1,0 +1,161 @@
+######################################
+# INITIALIZATION
+clear
+# package gpu 1
+log NiFeMoCo_annealing.log
+units metal
+dimension 3
+boundary p p p
+atom_style atomic
+atom_modify map array
+
+######################################
+# READ MINIMIZED CONFIGURATION
+read_data final_system_minimized.data
+
+######################################
+# GROUP DEFINITIONS
+# Create groups for CoFeNiMo atoms
+group Ni type 1
+group Fe type 2
+group Cr type 3
+group Co type 4
+group all_atoms union Ni Fe Cr Co
+
+# Define variables for box dimensions
+variable zlo equal zlo
+variable zhi equal zhi
+variable z_low_boundary equal ${zlo}+5.0
+variable z_high_boundary equal ${zhi}-5.0
+
+# Define grain boundary regions near the box edges (5 Å thick)
+region GB_z_low block INF INF INF INF ${zlo} ${z_low_boundary} units box
+region GB_z_high block INF INF INF INF ${z_high_boundary} ${zhi} units box
+
+# Create groups for grain boundary and interior atoms
+group GB region GB_z_low
+group GB region GB_z_high
+group Interior subtract all_atoms GB
+
+######################################
+# DEFINE INTERATOMIC POTENTIAL
+pair_style eam/alloy
+pair_coeff * * <POTENTIAL> Ni Fe Cr Co
+
+######################################
+# ADVANCED ANALYSES
+# Compute RDF for groups and subregions
+# compute rdf_Fe_around_Fe all rdf 1000 1 1
+# compute rdf_Fe_around_Ni all rdf 1000 1 2
+# compute rdf_Fe_around_Co all rdf 1000 1 3
+# compute rdf_Ni_around_Fe all rdf 1000 2 1
+# compute rdf_Ni_around_Ni all rdf 1000 2 2
+# compute rdf_Ni_around_Co all rdf 1000 2 3
+# compute rdf_Co_around_Fe all rdf 1000 3 1
+# compute rdf_Co_around_Ni all rdf 1000 3 2
+# compute rdf_Co_around_Co all rdf 1000 3 3
+
+
+# Mean Square Displacement (MSD)
+compute msd_Ni Ni msd
+compute msd_Fe Fe msd
+compute msd_Mo Cr msd
+compute msd_Co Co msd
+compute msd_all all msd
+compute msd_GB GB msd
+compute msd_Interior Interior msd
+
+# Stress calculations - using per-atom stress for all groups
+compute stress_atom all stress/atom NULL
+# Sum up per-atom stress for each group
+compute stress_GB GB reduce sum c_stress_atom[1] c_stress_atom[2] c_stress_atom[3] c_stress_atom[4] c_stress_atom[5] c_stress_atom[6]
+compute stress_Interior Interior reduce sum c_stress_atom[1] c_stress_atom[2] c_stress_atom[3] c_stress_atom[4] c_stress_atom[5] c_stress_atom[6]
+compute pressure all pressure NULL virial
+
+# Potential Energy
+compute pe_atoms all pe/atom
+compute pe_sum all reduce sum c_pe_atoms
+compute pe_GB GB reduce sum c_pe_atoms
+compute pe_Interior Interior reduce sum c_pe_atoms
+
+######################################
+# SIMULATION PARAMETERS
+variable seed equal 12345
+variable init_temp equal 300.0    # Initial temperature (K)
+variable peak_temp equal 3300.0   # Peak annealing temperature (K)
+variable final_temp equal 300.0   # Final temperature (K)
+
+# Time-based step calculations
+variable heating_steps equal 1000000     # 1  ns heating
+variable hold_steps equal    10000000    # 10 ns hold at peak temperature
+variable cooling_steps equal 10000000    # 10 ns cooling
+
+######################################
+# OUTPUT CONTROL
+# Dump files for trajectory
+dump TRAJ all atom 10000 NiFeMoCo_trajectory.dump
+dump_modify TRAJ scale no
+
+# MSD output
+fix msd_output all print 1000 &
+    "$(step) $(temp) $(press) $(c_msd_Ni[4]) $(c_msd_Fe[4]) $(c_msd_Mo[4]) $(c_msd_Co[4]) $(c_msd_all[4]) $(c_msd_GB[4]) $(c_msd_Interior[4])" &
+    file msd_analysis.txt screen no &
+    title "# Step Temperature Pressure MSD_Ni MSD_Fe MSD_Mo MSD_Co MSD_all MSD_GB MSD_Interior"
+
+# Stress output
+fix stress_output all print 1000 &
+    "$(step) $(temp) $(c_stress_GB[1]) $(c_stress_GB[2]) $(c_stress_GB[3]) $(c_stress_Interior[1]) $(c_stress_Interior[2]) $(c_stress_Interior[3])" &
+    file stress_analysis.txt screen no &
+    title "# Step Temperature GB_xx GB_yy GB_zz Int_xx Int_yy Int_zz"
+
+# Potential energy output
+fix pe_output all print 1000 &
+    "$(step) $(temp) $(c_pe_sum) $(c_pe_GB) $(c_pe_Interior)" &
+    file pe_analysis.txt screen no &
+    title "# Step Temperature PE_Total PE_GB PE_Interior"
+
+######################################
+# THERMO OUTPUT
+thermo 1000
+thermo_style custom step temp pe ke etotal press pxx pyy pzz
+thermo_modify norm yes
+
+######################################
+# ANNEALING PROCEDURE
+# Initialize velocities
+velocity all create ${init_temp} ${seed} dist gaussian
+
+# Heating stage - anisotropic damping
+fix NPT_HEAT all npt temp ${init_temp} ${peak_temp} 0.1 aniso 1.0 1.0 5.0
+run ${heating_steps}
+
+# Hold stage - first 9 ns (to reach 11 ns total)
+unfix NPT_HEAT
+fix NPT_HOLD all npt temp ${peak_temp} ${peak_temp} 0.1 aniso 1.0 1.0 5.0 
+run 9000000   # Run for 9 ns (9 million steps)
+
+# Save the configuration at 10 ns
+write_data system_NiFeMoCo_10ns.data nocoeff
+
+# Continue hold for remaining 1 ns
+run 1000000   # Run for remaining 1 ns to complete the hold stage
+
+# Cooling stage
+unfix NPT_HOLD
+fix NPT_COOL all npt temp ${peak_temp} ${final_temp} 0.1 aniso 1.0 1.0 5.0 
+run ${cooling_steps}
+
+######################################
+# FINAL ANALYSIS AND OUTPUT
+# Save the annealed system configuration
+write_data system_NiFeMoCo_annealed.data nocoeff
+
+# Print final properties
+variable natoms equal "count(all)"
+print "Final temperature (K) = $(temp)"
+print "Final total energy (eV) = $(c_pe_sum)"
+print "Number of atoms = ${natoms}"
+
+# Completion message
+print "Annealing complete. Output files generated."
+print "Configuration at 10 ns saved in system_NiFeMoCo_10ns.data"

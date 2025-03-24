@@ -1,0 +1,57 @@
+# ----- STRINGS -----
+	variable 1 string "Co"
+	variable 2 string "Fe"
+	variable 3 string "Ni"
+        variable 4 string "Cr"
+	variable sys string "Co-Fe-Ni-Cr"
+	variable ff_lib string "../../potential-files/meam/choi/library.meam"
+	variable ff_lib_e string "Co Ni Cr Fe Mn"
+	variable ff_mod string "../../potential-files/meam/choi/CoNiCrFeMn.meam"
+	variable ff_mod_e string "Co Fe Ni Cr"
+	variable ff_style string "meam"
+
+
+
+# ----- VARIABLES -----
+	variable Tinitial equal 300
+	variable Thigh  equal 3200    # High temperature for annealing (K)
+	variable Tfinal equal 300     # Final temperature after cooling (K)
+	variable Tstep equal 10  # Incremento temperatura in riscaldamento e raffreddamento
+	variable safe_interval equal 10000
+	variable nsteps equal 5 # Number of cooling steps (pay attention to the cooling rate based on the system) (-> here: K/ns)
+
+
+# Fixed time parameters
+	variable tdamp  equal 0.1     # Thermostat damping (ps)
+	variable pdamp  equal 1.0     # Barostat damping (ps)
+
+
+# Pressure
+	variable press equal 1.0
+
+
+# Output name files
+	variable run  string annealing_${sys}
+
+
+
+
+# ----- DETAILS -----
+	echo            log
+	log             ${run}.log
+
+
+# Styles
+	units        metal
+	atom_style   atomic
+	pair_style   ${ff_style}
+
+# Neighbour list
+	neighbor        2.0 bin
+	neigh_modify    check yes
+
+
+# Boundary conditions
+	boundary p p p
+
+

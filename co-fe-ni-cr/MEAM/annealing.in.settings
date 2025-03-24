@@ -1,0 +1,6 @@
+# ----- SETTINGS -----
+# Forcefield
+	pair_coeff * * "${ff_lib} ${ff_lib_e} ${ff_mod} ${ff_mod_e}"
+
+# Collection of atoms
+	group alloy type  1 2 3 4
