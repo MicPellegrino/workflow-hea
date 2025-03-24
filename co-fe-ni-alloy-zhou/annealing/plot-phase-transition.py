@@ -20,20 +20,35 @@ def read_xvg(file_path):
                 x[i].append(float(value))
     return t, x, n
 
-time, temperature, n = read_xvg("temperature_heating.dat")
-time, potential, n = read_xvg("potential_heating.dat")
-time, kinetic, n = read_xvg("kinetic_heating.dat")
+na = 108000
 
-temperature = np.array(temperature[0])
-potential = np.array(potential[0])
-kinetic = np.array(kinetic[0])
-total = potential+kinetic
+time, temperature_heating, n = read_xvg("temperature_heating.dat")
+time, potential_heating, n = read_xvg("potential_heating.dat")
+time, kinetic_heating, n = read_xvg("kinetic_heating.dat")
 
-plt.plot(temperature,potential,'b.',label='Potential')
-plt.plot(temperature,kinetic,'r.',label='Kinetic')
-plt.plot(temperature,kinetic+potential,'k.',label='Total')
-plt.legend()
-plt.xlim([min(temperature),max(temperature)])
-plt.xlabel(r'$T$ [K]')
-plt.ylabel(r'$E$ [eV]')
+time, temperature_cooling, n = read_xvg("temperature_10.dat")
+time, potential_cooling, n = read_xvg("potential_10.dat")
+time, kinetic_cooling, n = read_xvg("kinetic_10.dat")
+
+temperature_heating = np.array(temperature_heating[0])
+potential_heating = np.array(potential_heating[0])/na
+kinetic_heating = np.array(kinetic_heating[0])/na
+total_heating = potential_heating+kinetic_heating
+
+temperature_cooling = np.array(temperature_cooling[0])
+potential_cooling = np.array(potential_cooling[0])/na
+kinetic_cooling = np.array(kinetic_cooling[0])/na
+total_cooling = potential_cooling+kinetic_cooling
+
+# plt.plot(temperature_cooling,potential_cooling,'b.',label='Potential per-atom (cooling)')
+# plt.plot(temperature_cooling,kinetic_cooling,'b.',label='Kinetic per-atom (cooling)')
+plt.plot(temperature_cooling,kinetic_cooling+potential_cooling,'b.',label='Total per-atom (cooling)')
+# plt.plot(temperature_heating,potential_heating,'ro',label='Potential per-atom (heating)')
+# plt.plot(temperature_heating,kinetic_heating,'ro',label='Kinetic per-atom (heating)')
+plt.plot(temperature_heating,kinetic_heating+potential_heating,'ro',label='Total per-atom (heating)')
+plt.xlim([min(temperature_heating),max(temperature_heating)])
+plt.legend(fontsize=25)
+plt.tick_params(axis='both', labelsize=20)
+plt.xlabel(r'$T$ [K]', fontsize=25)
+plt.ylabel(r'$E$ [eV]', fontsize=25)
 plt.show()
