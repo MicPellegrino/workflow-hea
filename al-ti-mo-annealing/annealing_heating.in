@@ -4,18 +4,18 @@
 # ----------------- Init Section -----------------
 
 # Low-temperature annealing
-# variable Thigh equal 1500
-# variable run string annealing_AlMoTi_heating_lt 
-# variable outf string "molten_AlTiMo_lt.data"  
-# variable outd string "AlTiMo_lt.dump"   
-# variable outt string "temperature_lt.dat"             
+variable Thigh equal 1500
+variable run string annealing_AlMoTi_heating_lt 
+variable outf string "molten_AlTiMo_lt.data"  
+variable outd string "AlTiMo_lt.dump"   
+variable outt string "temperature_lt.dat"             
 
 # High-temperature annealing
-variable Thigh equal 3570
-variable run string annealing_AlMoTi_heating_ht    
-variable outf string "molten_AlTiMo_ht.data"    
-variable outd string "AlTiMo_ht.dump"  
-variable outt string "temperature_ht.dat"
+# variable Thigh equal 3570
+# variable run string annealing_AlMoTi_heating_ht    
+# variable outf string "molten_AlTiMo_ht.data"    
+# variable outd string "AlTiMo_ht.dump"  
+# variable outt string "temperature_ht.dat"
 
 include "annealing.in.init"
 
