@@ -8,6 +8,7 @@
 	variable ff_lib_e string "Co Ni Cr Fe Mn"
 	variable ff_mod string "../../potential-files/meam/choi/CoNiCrFeMn.meam"
 	variable ff_mod_e string "Co Fe Ni Cr"
+	variable ff string "${ff_lib} ${ff_lib_e} ${ff_mod} ${ff_mod_e}"
 	variable ff_style string "meam"
 
 
