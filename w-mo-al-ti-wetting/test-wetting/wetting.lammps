@@ -1,0 +1,22 @@
+# ----------------- Init Section -----------------
+
+include 		"wetting-init.lammps"
+
+# ----------------- Atom Definition Section -----------------
+
+read_data 		"droplet.data" extra/atom/types 2
+read_data 		"surface.data" add append offset 2 0 0 0 0 
+
+# ----------------- Settings Section -----------------
+
+include 		"wetting-settings.lammps"
+
+# ----------------- Run Section -----------------
+
+# Energy minimization
+minimize		1.0e-4 1.0e-6 100 1000
+reset_timestep 	0
+
+include 		"wetting-run.lammps"
+
+write_data      wetting.data

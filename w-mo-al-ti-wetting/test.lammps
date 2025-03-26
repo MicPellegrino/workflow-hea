@@ -1,0 +1,21 @@
+units        	metal
+atom_style   	atomic
+pair_style   	eam/alloy
+
+neighbor  		2.0 bin
+neigh_modify    check yes
+
+boundary 		p p p
+
+read_data 		"droplet-test.data" extra/atom/types 2
+read_data 		"surface-test.data" add append offset 2 0 0 0 0 
+
+pair_coeff 		* * ../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al Ti W Mo
+
+group 			liquid type 1 2
+group 			solid type 3 4
+
+group 			liquid type 1 2		# Al Ti
+group 			solid type 3 4 		# W Mo
+
+write_data 		combined-test.data

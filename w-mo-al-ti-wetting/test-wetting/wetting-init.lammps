@@ -1,0 +1,26 @@
+# ----- VARIABLES -----
+variable 		T equal 2000     	# Initial temperature (K)
+variable 		tdamp  equal 0.1	# Thermostat damping (ps)
+
+# Output name files
+variable 		run string wetting_AlTi_WMo
+
+# ----- DETAILS -----
+echo 			log
+log 			${run}.log
+
+# Styles
+units     		metal
+atom_style 		atomic
+pair_style 		eam/alloy
+
+# Neighbour list
+neighbor   	 	2.0 bin
+neigh_modify	check yes
+
+# Boundary conditions
+boundary 		p p p
+
+# Some dummy fixes to compute non-existing properties
+fix df1 all property/atom mol
+fix df2 all property/atom q

@@ -1,0 +1,8 @@
+# ----- SETTINGS -----
+
+# Forcefield
+pair_coeff 	* * /home/michele/workflow-hea/potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al Ti W Mo
+
+# Collection of atoms
+group 		liquid type 1 2
+group 		solid type 3 4
