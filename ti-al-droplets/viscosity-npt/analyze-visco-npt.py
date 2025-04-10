@@ -107,13 +107,15 @@ ax1.plot(tfit, np.polyval(p,tfit), 'r--',
 for jj in range(num_sets) :
     ax1.plot(tint, avint[jj], 'b:',
     linewidth=0.75)
-ax1.set_xlabel(r'$t$ [ps]', fontsize=20)
-ax1.set_ylabel(r'$I^2$ [cP$^2$]', fontsize=20)
+ax1.set_xlabel(r'$t$ [ps]', fontsize=25)
+ax1.set_ylabel(r'$I^2$ [cP$^2$]', fontsize=25)
 ax1.set_xlim([tint[0], tint[-1]])
+ax1.tick_params(axis='both', labelsize=20)
 
 ax2.plot(tint[1:], std_avint_p[1:], 'b-')
-ax2.set_xlabel(r'$t$ [ps]', fontsize=20)
-ax2.set_ylabel(r'$std(I^2)$ [$\%$]', fontsize=20)
+ax2.set_xlabel(r'$t$ [ps]', fontsize=25)
+ax2.set_ylabel(r'$std(I^2)$ [$\%$]', fontsize=25)
 ax2.set_xlim([tint[0], tint[-1]])
+ax2.tick_params(axis='both', labelsize=20)
 
 plt.show()

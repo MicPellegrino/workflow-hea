@@ -31,10 +31,12 @@ dt = 0.001              # Time step [ps]
 T = 2000                # Temperature [K]
 kB = (1e3)*138.0649     # kB [bar*nm^3/K]
 
-# Reading .xvg output
-t, eint, nint = read_xvg('020/eint.dat')
-# The volume depends on the run
-V = 5.24111**3          # Volume [nm^3]
+### Reading .xvg output and defining volume ###
+t, eint, nint = read_xvg('100/eint.dat')
+(xlo,xhi) = (-26.200329268596043,26.200329268596043)
+lx = xhi-xlo
+V = (0.1*lx)**3               # Volume [nm^3]
+print(">>> V =",V," nm^3")
 
 scale = V/(2.0*T*kB)
 
