@@ -1,0 +1,79 @@
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic
+atom_modify map array
+
+# Number of box replicates
+variable nr equal 9
+
+# File names
+variable outdata0 string "AlMoTi_ref.data"
+variable outdata1 string "AlMoTi_minimized.data"
+variable outdata2 string "AlMoTi_mcmd.data"
+variable ffname string "../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy"
+
+variable fAl equal 0.6854
+variable fMo equal 0.2305
+variable fTi equal 0.0841
+
+# Reasonable lattice for AlMoTi ???
+variable fccAlMoTi equal 4.0493
+lattice fcc ${fccAlMoTi}
+
+# Unreasonable lattice for AlMoTi
+# ...
+# ...
+
+region box block 0 1 0 1 0 1 units lattice 
+create_box 3 box 
+create_atoms 1 box 
+replicate ${nr} ${nr} ${nr}
+
+# Labelmap: atom 1 W, atom 2 Mo
+# Method 1: random assingment
+set type 1 type/fraction 2 $(v_fMo+v_fTi) 1234567
+set type 2 type/fraction 3 $((v_fTi)/(v_fMo+v_fTi)) 1234566
+
+# Method 2: assignment based on region
+# ...
+
+pair_style eam/alloy 
+pair_coeff * * ${ffname} Al Mo Ti
+neighbor 2.0 bin
+neigh_modify delay 0 every 1 check yes
+
+write_data ${outdata0}
+
+variable pea_avg equal "pe/atoms"
+thermo 10
+thermo_style custom step v_pea_avg pe lx ly lz press 
+
+# Energy minimization
+fix myMin all box/relax iso 0.0 vmax 0.001  
+min_style cg 
+minimize 1e-4 1e-5 1000 10000
+unfix myMin
+reset_timestep 0
+
+write_data ${outdata1}
+
+dump myDump all custom 125 AlMoTi.dump id type x y z xu yu zu vx vy vz
+dump_modify myDump element Co Fe Ni
+
+velocity all create 300.0 4928459 rot yes dist gaussian
+
+# Fix NPT
+timestep 0.001
+fix myMD all npt temp 300.0 300.0 1.0 aniso 0.0 0.0 5.0
+
+# Fix atom swaps
+# (for some reason it is possible to swap only two atom types at the time
+# unless the simulation is performed in the grand-canonical ensemble?)
+fix myMC1 all atom/swap 250 672 1234 300.0 ke no types 1 2
+fix myMC2 all atom/swap 250 245 2345 300.0 ke no types 2 3
+fix myMC3 all atom/swap 250 83 3456 300.0 ke no types 1 3
+
+run 100000  # 100 ps
+
+write_data ${outdata2}

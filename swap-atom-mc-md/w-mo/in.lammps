@@ -1,0 +1,81 @@
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic
+atom_modify map array
+
+# Number of box replicates
+variable nr equal 6
+
+# File names
+variable outdata0 string "WMo_ref.data"
+variable outdata1 string "WMo_minimized.data"
+variable outdata2 string "WMo_mcmd.data"
+variable ffname string "../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy"
+
+# Fraction of each atomic component
+variable fW equal 0.5
+variable fMo equal 0.5
+
+# Reasonable lattice for WMo
+variable bccWMo equal 3.165
+lattice bcc ${bccWMo}
+variable Lx equal ${nr}*${bccWMo}
+variable Ly equal ${nr}*${bccWMo}
+variable Lz equal ${nr}*${bccWMo}
+
+# Unreasonable lattice for WMo
+# variable fccAl equal 4.0493
+# lattice fcc ${fccAl}
+# ...
+
+variable hLx equal 0.5*${Lx}
+
+region box block 0 1 0 1 0 1 units lattice 
+create_box 2 box 
+create_atoms 1 box 
+replicate ${nr} ${nr} ${nr} 
+
+# Labelmap: atom 1 W, atom 2 Mo
+# Method 1: random assingment
+# set type 1 type/fraction 2 $(v_fMo) 1234567
+# Method 2: assignment based on region
+region boxMo block 0 ${hLx} 0 ${Ly} 0 ${Lz} units box
+group refMo region boxMo
+set group refMo type 2
+
+pair_style eam/alloy 
+pair_coeff * * ${ffname} W Mo
+neighbor 2.0 bin
+neigh_modify delay 0 every 1 check yes
+
+write_data ${outdata0}
+
+variable pea_avg equal "pe/atoms"
+thermo 10
+thermo_style custom step v_pea_avg pe lx ly lz press 
+
+# Energy minimization
+fix myMin all box/relax iso 0.0 vmax 0.001  
+min_style cg 
+minimize 1e-4 1e-5 1000 10000
+unfix myMin
+reset_timestep 0
+
+write_data ${outdata1}
+
+dump myDump all custom 50 WMo.dump id type x y z xu yu zu vx vy vz
+dump_modify myDump element W Mo
+
+velocity all create 300.0 4928459 rot yes dist gaussian
+
+# Fix NPT
+timestep 0.001
+fix myMD all npt temp 300.0 300.0 1.0 aniso 0.0 0.0 5.0
+
+# Fix atom swap
+fix myMC all atom/swap 200 10 29494 300.0 ke no types 1 2
+
+run 10000
+
+write_data ${outdata2}
