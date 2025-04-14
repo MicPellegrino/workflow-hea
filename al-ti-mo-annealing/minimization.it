@@ -1,0 +1,69 @@
+# INITIALIZATION
+clear 
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic 
+atom_modify map array 
+
+# ATOM DEFINITION
+lattice fcc 4.0493
+region box block 0 1 0 1 0 1 units lattice
+create_box 3 box
+create_atoms 1 box
+replicate 34 34 34
+
+# Set atom type ratios more carefully
+set type 1 type/ratio 2 0.2305  12345 # Mo percentage (23.05)
+set type 1 type/ratio 3 0.0841  12345 # Ti percentage (6.47)
+
+# POTENTIAL
+pair_style eam/alloy 
+pair_coeff * * ../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al Mo Ti
+neighbor 2.0 bin 
+neigh_modify delay 0 every 1 check yes 
+
+# Reduce timestep 
+timestep 0.0005
+
+# COMPUTES
+compute eng all pe/atom 
+compute eatoms all reduce sum c_eng 
+
+# OUTPUT SETTINGS
+thermo 50
+thermo_style custom step temp pe ke etotal press vol lx ly lz atoms
+
+# Initial state
+write_data AlMoTi_initial.data
+
+# EQUILIBRATION PROCEDURE
+# 1. Very gentle minimization
+# min_style quickmin
+# minimize 1e-3 1e-3 1000 1000
+
+#####################################################
+# ENERGY MINIMIZATION
+fix 1 all box/relax iso 0.0 vmax 0.001  
+thermo 10 
+thermo_style custom step pe lx ly lz press c_eatoms 
+min_style cg 
+minimize 1e-25 1e-25 5000 10000
+
+# COUNT ATOMS
+group Alum type 1
+group Molb type 2
+group Tita type 3
+
+variable nAl equal count(Alum)
+variable nMo equal count(Molb)
+variable nTi equal count(Tita)
+
+print "Total number of atoms = $(count(all))"
+print "Number of Al atoms = ${nAl}"
+print "Number of Mo atoms = ${nMo}"
+print "Number of Ti atoms = ${nTi}"
+
+write_data AlMoTi_minimized.data
+
+run 0
