@@ -1,0 +1,33 @@
+# Dump configuration
+	dump            d1 all custom 100000 annealed_system_heating.dump id type x y z xu yu zu vx vy vz
+	dump_modify     d1 element Co Fe Ni
+
+# Output temperature and energy
+	fix myat1 all ave/time 10 100 10000 v_Toutput file temperature_heating.dat
+	fix mype1 all ave/time 10 100 10000 v_totPe file potential_heating.dat
+	fix myke1 all ave/time 10 100 10000 v_totKe file kinetic_heating.dat
+
+# Thermo output
+	thermo          1000
+	thermo_style    custom step temp press pe ke etotal vol density 
+	thermo_modify   flush yes
+
+# ----- INITIAL EQUILIBRATION AT Ti, to 0 bar -----
+	velocity        all create ${Tlow} 872392 dist gaussian
+	fix             feq all npt temp ${Tlow} ${Tlow} ${tdamp} iso ${Phigh} ${Plow} ${pdamp}
+	run             100000 # 100 ps
+	unfix           feq
+
+# ----- HEATING FROM Ti TO Thigh at 0bar-----
+	fix             fheat all npt temp ${Tlow} ${Thigh} ${tdamp} aniso ${Plow} ${Plow} ${pdamp}
+	run             ${nheat}
+	unfix           fheat
+
+# ----- HOLD AT Thigh, isotropic 0bar -----
+	fix             fhold all npt temp ${Thigh} ${Thigh} ${tdamp} iso ${Plow} ${Plow} ${pdamp}
+	run             ${nhold}
+	unfix           fhold
+
+# ----- FINAL OUTPUT -----
+	write_data      molten_Co-Fe-Ni.data
+

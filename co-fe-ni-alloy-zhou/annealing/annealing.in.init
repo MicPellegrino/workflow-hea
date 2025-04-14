@@ -1,0 +1,43 @@
+# ----- VARIABLES -----
+	variable Tlow 	equal 300     # Initial temperature (K)
+	variable Thigh  equal 3300    # High temperature for annealing (K)
+	variable Toutput equal temp
+	variable totPe equal pe
+	variable totKe equal ke
+
+
+# Fixed time parameters
+	variable tdamp  equal 1.0     # Thermostat damping (ps)
+	variable pdamp  equal 5.0     # Barostat damping (ps)
+
+
+# Pressure
+	variable Phigh  equal 1.0
+	variable Plow  	equal 0.0
+
+
+# Heating time
+	variable theat	equal 1
+	variable nheat  equal ${theat}*1000000
+
+# Holding time
+	variable thold	equal 5
+	variable nhold  equal ${thold}*1000000
+
+# ----- DETAILS -----
+	echo            log
+	log             ${run}.log
+
+
+# Styles
+	units        metal
+	atom_style   atomic
+	pair_style   eam/alloy
+
+# Neighbour list
+	neighbor        2.0 bin
+	neigh_modify    check yes
+
+
+# Boundary conditions
+	boundary p p p

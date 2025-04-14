@@ -1,0 +1,34 @@
+# Dump configuration
+	dump            d1 all custom 100000 annealed_system_${tcool}.dump id type x y z xu yu zu vx vy vz
+	dump_modify     d1 element Co Fe Ni
+
+# Output temperature and energy
+	fix myat1 all ave/time 10 100 10000 v_Toutput file temperature_${tcool}.dat
+	fix mype1 all ave/time 10 100 10000 v_totPe file potential_${tcool}.dat
+	fix myke1 all ave/time 10 100 10000 v_totKe file kinetic_${tcool}.dat
+
+# Thermo output
+	thermo          1000
+	thermo_style    custom step temp press pe ke etotal vol density
+	thermo_modify   flush yes
+
+# ----- INITIAL EQUILIBRATION AT Thigh -----
+	velocity        all create ${Thigh} 872392 dist gaussian
+	fix             feq all npt temp ${Thigh} ${Thigh} ${tdamp} iso ${Plow} ${Plow} ${pdamp}
+	run             100000		# 100 ps
+	unfix           feq
+
+# ----- COOLING LOOP FROM Thigh DOWN TO Tfinal -----
+	fix  		fcool all npt temp ${Thigh} ${Tlow} ${tdamp} aniso ${Plow} ${Plow} ${pdamp}
+	run  		${ncool}
+	unfix 		fcool
+
+# ----- HOLD AT Tfinal for analysis -----
+	fix             ffinal all npt temp ${Tlow} ${Tlow} ${tdamp} aniso ${Plow} ${Plow} ${pdamp}
+	run             100000   	# 100 ps
+	unfix           ffinal
+
+
+# ----- FINAL OUTPUT -----
+	write_data      annealed_Co-Fe-Ni_${tcool}.data
+
