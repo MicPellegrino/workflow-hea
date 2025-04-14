@@ -23,8 +23,8 @@ variable fNi equal 0.33334
 # lattice fcc ${fccCoFeNi}
 
 # Unreasonable lattice for CoFeNi
-variable fccCoFeNi equal 4.0493
-lattice fcc ${fccCoFeNi}
+variable fccCoFeNi equal 2.8665
+lattice bcc ${fccCoFeNi}
 
 region box block 0 1 0 1 0 1 units lattice 
 create_box 3 box 
@@ -57,7 +57,7 @@ write_data ${outdata0}
 
 variable pea_avg equal "pe/atoms"
 thermo 10
-thermo_style custom step v_pea_avg pe lx ly lz press 
+thermo_style custom step v_pea_avg pe temp lx ly lz press 
 
 # Energy minimization
 fix myMin all box/relax iso 0.0 vmax 0.001  
