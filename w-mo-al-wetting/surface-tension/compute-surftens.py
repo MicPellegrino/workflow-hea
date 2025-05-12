@@ -15,6 +15,7 @@ def read_two_column_file(file_path):
     return data
 
 folder_name = 'slab_8_4'
+# folder_name = 'TEST_SURFTENS'
 dt = 0.001
 t0 = 200
 
