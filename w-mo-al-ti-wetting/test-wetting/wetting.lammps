@@ -1,22 +1,58 @@
-# ----------------- Init Section -----------------
+variable 		T equal 2000     	    # Initial temperature (K)
+variable 		tdamp  equal 1.0	    # Thermostat damping (ps)
 
-include 		"wetting-init.lammps"
+# Output name files
+variable 		run string wetting_AlTiWMo
+echo 			log
+log 			${run}.log
 
-# ----------------- Atom Definition Section -----------------
+# Styles
+units     		metal
+atom_style 		atomic
+pair_style 		eam/alloy
 
+# Neighbour list
+neighbor   	 	2.0 bin
+neigh_modify	check yes
+
+# Boundary conditions
+boundary 		p p p
+
+# Some dummy fixes to compute non-existing properties
+fix             df1 all property/atom mol
+fix             df2 all property/atom q
+
+# Atom Definition Section
 read_data 		"droplet.data" extra/atom/types 2
 read_data 		"surface.data" add append offset 2 0 0 0 0 
 
-# ----------------- Settings Section -----------------
+# Forcefield
+pair_coeff 	    * * ../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al Ti W Mo
 
-include 		"wetting-settings.lammps"
-
-# ----------------- Run Section -----------------
+# Collection of atoms
+group 		    liquid type 1 2
+group 		    solid type 3 4
 
 # Energy minimization
 minimize		1.0e-4 1.0e-6 100 1000
 reset_timestep 	0
 
-include 		"wetting-run.lammps"
+# Thermo output
+thermo          1000
+thermo_style    custom step temp press pe ke etotal vol density
+thermo_modify   flush yes
 
-write_data      wetting.data
+# Dump configuration
+	
+# Dump style with a 'placeholder' variable for molecules
+variable 	    dummyMol atom "gmask(liquid)+2.0*gmask(solid)"
+dump 		    d1 all custom 2500 ${run}.dump id v_dummyMol type q x y z vx vy vz
+dump_modify	    d1 element Al Ti W Mo
+
+# Fast wetting simulation
+velocity 	    all create ${T} 872392 dist gaussian
+fix      	    feq all nvt temp ${T} ${T} ${tdamp}
+run       	    25000
+unfix     	    feq
+
+write_data      ${run}.data
