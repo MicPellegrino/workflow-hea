@@ -23,13 +23,17 @@ shift_z_substrate = 23
 def PrepareDropletSubstrate(
     in_file_droplet, 
     in_file_surface, 
-    scale_z=0, 
-    shift_z_droplet=0, 
-    shift_z_substrate=0, 
+    scale_z=1, 
+    shift_z_droplet=0,
+    shift_z_substrate=None,
+    gap_z=None, 
     out_file_droplet='droplet.data',
     out_file_surface='surface.data',
     debug=False
     ) :
+
+    # Doing some preliminary static assert
+    assert (shift_z_substrate is not None) or (gap_z is not None) , "Need to pass a distance or a shift!"
 
     pipeline_droplet = import_file(in_file_droplet)
     pipeline_substrate = import_file(in_file_surface)
@@ -110,6 +114,17 @@ def PrepareDropletSubstrate(
                                                   [0, 0, 1, -substrate_cell_0[2,3]]])
     pipeline_substrate.modifiers.append(mod4)
     data_substrate = pipeline_substrate.compute()
+
+    # Determine the downward shift if the gap is provided instead
+    if shift_z_substrate==None :
+        coord_liq = data_droplet.particles.positions
+        coord_liq = coord_liq[...]
+        zmin_liq = np.min(coord_liq[:,2])
+        coord_sub = data_substrate.particles.positions
+        coord_sub = coord_sub[...]
+        zmax_sub = np.max(coord_sub[:,2])
+        dzp = zmin_liq-zmax_sub
+        shift_z_substrate = gap_z - dzp
 
     mod5 = AffineTransformationModifier(operate_on = {'particles'},
                                 transformation = [[1, 0, 0, 0],
