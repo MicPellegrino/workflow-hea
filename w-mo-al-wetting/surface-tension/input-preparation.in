@@ -1,6 +1,6 @@
 variable fccAl equal 4.0493
 
-variable nxy equal 4
+variable nxy equal 8
 variable nz equal 4
 
 variable Las equal ${fccAl}*${nxy}
