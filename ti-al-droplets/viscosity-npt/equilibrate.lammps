@@ -1,0 +1,41 @@
+# Temperature
+variable T0 equal 2000
+
+# Files
+variable foln string "100"
+variable indata string "${foln}/molten_AlTi.data"
+variable outdata string "${foln}/molten_AlTi_eq.data"
+variable fdump string "${foln}/dump.lammpstrj"
+
+units metal
+boundary p p p
+atom_style atomic
+
+read_data ${indata}
+labelmap atom 1 Al 2 Ti
+
+pair_style eam/alloy/gpu
+pair_coeff * * ../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al Ti
+
+minimize 1.0e-4 1.0e-6 100 1000
+reset_timestep 0
+
+dump dp1 all atom 5000 ${fdump}
+
+thermo 1000
+thermo_style    custom step temp press pe ke etotal vol density
+thermo_modify   flush yes
+
+velocity all create ${T0} 123918 rot yes mom yes dist gaussian
+
+# Equilibration (NPT)
+fix mynpt1 all npt temp ${T0} ${T0} 1.0 iso 1.0 1.0 5.0
+timestep 0.001
+run 100000  # 100 ps
+
+# Equilibration (NVT)
+unfix mynpt1
+fix mynvt1 all nvt temp ${T0} ${T0} 1.0
+run 100000  # 100 ps
+
+write_data  ${outdata}

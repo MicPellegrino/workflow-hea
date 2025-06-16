@@ -1,0 +1,62 @@
+variable fccAl equal 4.0493
+
+variable Lx equal ${fccAl}*7
+variable Ly equal ${fccAl}*7
+variable Lz equal ${fccAl}*7
+
+# Initial and final temperatures
+variable Ti equal 300
+variable Tf equal 2000
+
+units metal
+boundary p p p
+atom_style atomic
+
+region system block -${Lx} ${Lx} -${Ly} ${Ly} -${Lz} ${Lz}
+create_box 1 system
+
+pair_style eam/alloy
+pair_coeff * * ../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al
+
+lattice fcc ${fccAl}
+create_atoms 1 region system
+lattice none 1.0
+
+minimize 1.0e-4 1.0e-6 100 1000
+reset_timestep 0
+
+thermo 1000
+thermo_style    custom step temp press pe ke etotal vol density
+thermo_modify   flush yes
+
+velocity all create ${Ti} 123918 rot yes mom yes dist gaussian
+
+# Melting
+fix mynpt1 all npt temp ${Ti} ${Tf} 1.0 iso 1.0 1.0 5.0
+timestep 0.001
+
+run 20000  	# 20 ps
+
+# Equilibrating (NPT)
+unfix mynpt1
+fix mynpt2 all npt temp ${Tf} ${Tf} 1.0 iso 1.0 1.0 5.0
+
+run 20000  	# 20 ps
+
+# ----- Testing density binning ----- #
+
+# compute myBins all chunk/atom bin/2d z lower 2.0 y lower 2.0
+# fix myDens all ave/chunk 100 10 1000 myBins density/mass file tmp.out
+
+# fix myDensFix all ave/grid 100 10 1000 100 100 1 density/mass
+# dump gridDens all grid/vtk 1000 density/density_*.vtr f_myDensFix:grid:data
+
+# ----- ----------------------- ----- #
+
+# Equilibrating (NVT)
+unfix mynpt2
+fix mynvt1 all nvt temp ${Tf} ${Tf} 1.0
+
+run 20000  	# 20 ps
+
+write_data      molten_Al_large.data
