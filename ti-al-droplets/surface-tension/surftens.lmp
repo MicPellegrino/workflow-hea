@@ -1,0 +1,49 @@
+variable        path string "100"
+variable        infile string "${path}/molten_AlTi.data"
+
+units           metal
+boundary        p p p
+atom_style      atomic
+
+read_data	    ${infile}
+
+variable        Teq equal 	2000
+variable        Toutput equal 	temp
+variable        SurfTens equal "0.5*lz*(pzz-0.5*(pxx+pyy))"
+
+neighbor    	2.0 bin
+neigh_modify	check yes
+
+pair_style 	    eam/alloy
+pair_coeff      * * ../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy Al Ti
+
+### Initial equilibration
+
+thermo          1000
+thermo_style    custom step temp press pe ke etotal lz pxx pyy pzz v_SurfTens
+thermo_modify   flush yes
+
+velocity        all create ${Teq} 123918 rot yes mom yes dist gaussian
+fix             mynvt1 all nvt temp ${Teq} ${Teq} 1.0
+timestep        0.001
+run             10000
+
+unfix mynvt1
+reset_timestep 0
+
+write_data      ${path}/molten_AlTi_eq.data
+
+### Output definition
+
+dump            dp1 all atom 5000 ${path}/surftens.dump
+
+fix             myat1 all ave/time 10 100 1000 v_Toutput file ${path}/temperature.dat
+fix             myat2 all ave/time 10 100 1000 v_SurfTens file ${path}/surftens.dat
+
+### Production run
+
+fix             mynvt2 all nvt temp ${Teq} ${Teq} 1.0
+timestep        0.001
+run	            200000
+
+write_data      ${path}/molten_AlTi_fin.data
