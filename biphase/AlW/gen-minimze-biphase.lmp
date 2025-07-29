@@ -25,10 +25,10 @@ variable Y1 equal yhi
 variable Z0 equal zlo
 variable Z1 equal zhi
 
-region AlBox1 block ${X0} ${X1} ${Y0} ${Y1} ${Z0} -2 units box
+region AlBox1 block ${X0} ${X1} ${Y0} ${Y1} ${Z0} -3 units box
 create_atoms 2 region AlBox1
 
-region AlBox2 block ${X0} ${X1} ${Y0} ${Y1} 38.0 ${Z1} units box
+region AlBox2 block ${X0} ${X1} ${Y0} ${Y1} 39.0 ${Z1} units box
 create_atoms 2 region AlBox2
 
 group liquid type 2
