@@ -47,11 +47,8 @@ thermo_style custom step v_pea_avg pe lx ly lz press
 dump myDump all custom 50 W.dump id type xu yu zu
 dump_modify myDump element W Al
 
-fix fW substrate freeze
-
 # Energy minimization
 min_style cg 
 minimize 1e-4 1e-5 1000 10000
-unfix myMin
 
 write_data ${outdata1}
