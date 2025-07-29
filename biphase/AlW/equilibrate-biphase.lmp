@@ -1,0 +1,40 @@
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic
+atom_modify map array
+
+# File names
+variable indata0 string "AlW_ref.data"
+variable outdata0 string "AlW_minimize.data"
+variable ffname string "../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy"
+
+read_data ${indata0}
+
+group substrate type 1
+group liquid type 2
+
+pair_style eam/alloy 
+pair_coeff * * ${ffname} W Al
+neighbor 2.0 bin
+neigh_modify delay 0 every 1 check yes
+
+write_data ${outdata0}
+
+thermo 100
+thermo_style custom step temp pe lx ly lz press 
+
+dump myDump all custom 100 AlW.dump id type x y z
+dump_modify myDump element W Al
+
+timestep dt 0.001
+# NVT
+fix nvt1 all nvt temp 1200.0 1200.0 1.0
+run 10000
+unfix nvt1
+# NPT
+fix npt1 water npt temp 1200.0 1200.0 1.0 z 0.0 0.0 5.0
+run 10000
+unfix npt1
+
+write_data ${outdata1}
