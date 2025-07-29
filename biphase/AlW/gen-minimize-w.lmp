@@ -5,7 +5,7 @@ atom_style atomic
 atom_modify map array
 
 # Number of box replicates
-variable nr equal 6
+variable nr equal 20
 
 # File names
 variable outdata0 string "WMo_ref.data"
@@ -34,6 +34,9 @@ write_data ${outdata0}
 variable pea_avg equal "pe/atoms"
 thermo 10
 thermo_style custom step v_pea_avg pe lx ly lz press 
+
+dump myDump all custom 50 W.dump id type xu yu zu
+dump_modify myDump element W
 
 # Energy minimization
 fix myMin all box/relax iso 0.0 vmax 0.001  
