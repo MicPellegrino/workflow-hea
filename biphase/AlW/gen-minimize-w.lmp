@@ -43,6 +43,5 @@ fix myMin all box/relax iso 0.0 vmax 0.001
 min_style cg 
 minimize 1e-4 1e-5 1000 10000
 unfix myMin
-reset_timestep 0
 
 write_data ${outdata1}
