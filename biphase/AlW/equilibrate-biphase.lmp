@@ -19,20 +19,20 @@ pair_coeff * * ${ffname} W Al
 neighbor 2.0 bin
 neigh_modify delay 0 every 1 check yes
 
-thermo 100
+thermo 500
 thermo_style custom step temp pe lx ly lz press 
 
-dump myDump all custom 100 AlW.dump id type x y z
+dump myDump all custom 500 AlW.dump id type x y z
 dump_modify myDump element W Al
 
-timestep dt 0.001
+timestep 0.001
 # NVT
 fix nvt1 all nvt temp 1200.0 1200.0 1.0
-run 10000
+run 50000
 unfix nvt1
 # NPT
-fix npt1 water npt temp 1200.0 1200.0 1.0 z 0.0 0.0 5.0
-run 10000
+fix npt1 all npt temp 1200.0 1200.0 1.0 z 0.0 0.0 5.0
+run 50000
 unfix npt1
 
 write_data ${outdata0}
