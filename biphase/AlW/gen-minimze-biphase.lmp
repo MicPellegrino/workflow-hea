@@ -1,0 +1,57 @@
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic
+atom_modify map array
+
+# File names
+variable indata0 string "W_slab.data"
+variable outdata0 string "AlW_ref.data"
+variable outdata1 string "AlW_minimized.data"
+variable ffname string "../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy"
+
+read_data ${indata0} extra/atom/types 1
+
+group substrate type 1
+
+# Reasonable lattice for Al
+variable a equal 4.02
+lattice fcc ${a}
+
+variable X0 equal xlo
+variable X1 equal xhi
+variable Y0 equal ylo
+variable Y1 equal yhi
+variable Z0 equal zlo
+variable Z1 equal zhi
+
+region AlBox1 block ${X0} ${X1} ${Y0} ${Y1} ${Z0} -2 units box
+create_atoms 2 region AlBox1
+
+region AlBox2 block ${X0} ${X1} ${Y0} ${Y1} 38.0 ${Z1} units box
+create_atoms 2 region AlBox2
+
+group liquid type 2
+
+pair_style eam/alloy 
+pair_coeff * * ${ffname} W Al
+neighbor 2.0 bin
+neigh_modify delay 0 every 1 check yes
+
+write_data ${outdata0}
+
+variable pea_avg equal "pe/atoms"
+thermo 10
+thermo_style custom step v_pea_avg pe lx ly lz press 
+
+dump myDump all custom 50 W.dump id type xu yu zu
+dump_modify myDump element W Al
+
+fix fW substrate freeze
+
+# Energy minimization
+min_style cg 
+minimize 1e-4 1e-5 1000 10000
+unfix myMin
+
+write_data ${outdata1}
