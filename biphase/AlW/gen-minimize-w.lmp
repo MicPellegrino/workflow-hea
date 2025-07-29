@@ -6,23 +6,21 @@ atom_modify map array
 
 # Number of box replicates
 variable nr equal 20
+variable nz equal 12
 
 # File names
-variable outdata0 string "WMo_ref.data"
-variable outdata1 string "WMo_minimized.data"
+variable outdata0 string "W_ref.data"
+variable outdata1 string "W_minimized.data"
 variable ffname string "../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy"
 
 # Reasonable lattice for WMo
 variable a equal 3.165
 lattice bcc ${a}
-variable Lx equal ${nr}*${a}
-variable Ly equal ${nr}*${a}
-variable Lz equal ${nr}*${a}
 
 region box block 0 1 0 1 0 1 units lattice 
 create_box 1 box 
 create_atoms 1 box 
-replicate ${nr} ${nr} ${nr} 
+replicate ${nr} ${nr} ${nz} 
 
 pair_style eam/alloy 
 pair_coeff * * ${ffname} W
