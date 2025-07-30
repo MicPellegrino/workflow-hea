@@ -20,7 +20,7 @@ thermo 1000
 thermo_style custom step temp pe lx ly lz press 
 
 compute compMSD substrate msd com yes
-fix aveMSD all ave/time 1000 1 1000 c_compMSD[4] file msd.dat
+fix aveMSD all ave/time 1000 1 1000 c_compMSD[4] file msd_W.dat
 
 timestep 0.001
 # NVT
