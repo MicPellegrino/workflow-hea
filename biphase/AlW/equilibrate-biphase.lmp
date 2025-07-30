@@ -22,17 +22,17 @@ neigh_modify delay 0 every 1 check yes
 thermo 500
 thermo_style custom step temp pe lx ly lz press 
 
-dump myDump all custom 500 AlW.dump id type x y z
+dump myDump all custom 1000 AlW.dump id type x y z
 dump_modify myDump element W Al
 
 timestep 0.001
 # NVT
 fix nvt1 all nvt temp 1200.0 1200.0 1.0
-run 50000
+run 100000
 unfix nvt1
 # NPT
 fix npt1 all npt temp 1200.0 1200.0 1.0 z 0.0 0.0 5.0
-run 50000
+run 200000
 unfix npt1
 
 write_data ${outdata0}
