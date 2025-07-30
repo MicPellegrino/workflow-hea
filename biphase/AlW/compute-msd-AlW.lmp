@@ -1,0 +1,28 @@
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic
+atom_modify map array
+
+# File names
+variable indata0 string "AlW_minimize.data"
+variable ffname string "../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy"
+
+read_data ${indata0}
+group substrate type 1
+
+pair_style eam/alloy 
+pair_coeff * * ${ffname} W Al
+neighbor 2.0 bin
+neigh_modify delay 0 every 1 check yes
+
+thermo 1000
+thermo_style custom step temp pe lx ly lz press 
+
+compute compMSD substrate msd
+fix aveMSD all ave/time 1000 1 1000 c_compMSD file msd.dat
+
+timestep 0.001
+# NVT
+fix nvt1 all nvt temp 1200.0 1200.0 1.0
+run 500000
