@@ -40,6 +40,9 @@ potential_cooling = np.array(potential_cooling[0])/na
 kinetic_cooling = np.array(kinetic_cooling[0])/na
 total_cooling = potential_cooling+kinetic_cooling
 
+print(kinetic_cooling[0]+potential_cooling[0])
+print(kinetic_cooling[-1]+potential_cooling[-1])
+
 # plt.plot(temperature_cooling,potential_cooling,'b.',label='Potential per-atom (cooling)')
 # plt.plot(temperature_cooling,kinetic_cooling,'b.',label='Kinetic per-atom (cooling)')
 plt.plot(temperature_cooling,kinetic_cooling+potential_cooling,'b.',label='Total per-atom (cooling)')
