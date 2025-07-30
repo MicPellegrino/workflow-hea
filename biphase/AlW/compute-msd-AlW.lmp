@@ -19,8 +19,8 @@ neigh_modify delay 0 every 1 check yes
 thermo 1000
 thermo_style custom step temp pe lx ly lz press 
 
-compute compMSD substrate msd
-fix aveMSD all ave/time 1000 1 1000 c_compMSD file msd.dat
+compute compMSD substrate msd com yes
+fix aveMSD all ave/time 1000 1 1000 c_compMSD[4] file msd.dat
 
 timestep 0.001
 # NVT
