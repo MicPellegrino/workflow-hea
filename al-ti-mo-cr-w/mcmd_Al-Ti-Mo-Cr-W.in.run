@@ -1,0 +1,47 @@
+# Thermo
+    variable pea_avg equal "pe/atoms"       # average potential energy per atom [eV]
+    variable kea_avg equal "ke/atoms"     # average kinetic energy per atom [eV]
+    
+    thermo 1000
+    thermo_style custom step temp press lx ly lz density pe ke v_pea_avg v_kea_avg cpu
+
+
+# Minimization
+    fix myMin all box/relax iso 0.0 vmax 0.001
+    min_style cg
+    minimize 1e-4 1e-5 1000 10000
+    unfix myMin
+    reset_timestep 0
+    write_data ${out1}
+
+
+    fix equil all npt temp 300.0 300.0 100.0 iso 0.0 0.0 1000.0
+    run 5000
+    unfix equil
+
+# MDMC
+    timestep ${dt}
+    velocity all create ${temp} 368503 rot yes dist gaussian
+
+    dump myDump all custom 1000 Al-Ti-Mo-Cr-W.dump id type x y z xu yu zu vx vy vz
+    dump_modify myDump element Al Ti Mo Cr W
+
+    fix myMD all npt temp ${temp} ${temp} ${temp_damp} aniso ${press} ${press} ${press_damp}
+
+    # Monte Carlo swaps
+    fix swap12 all atom/swap 100 200 134345 ${temp} ke no types 1 2
+    fix swap13 all atom/swap 100 200 163445 ${temp} ke no types 1 3
+    fix swap14 all atom/swap 100 200 134543 ${temp} ke no types 1 4
+    fix swap15 all atom/swap 100 200 234524 ${temp} ke no types 1 5
+    #fix swap23 all atom/swap 250 333 127345 ${temp} ke no types 2 3
+    #fix swap24 all atom/swap 100 200 172345 ${temp} ke no types 2 4
+    #fix swap25 all atom/swap 250 333 123545 ${temp} ke no types 2 5
+    #fix swap34 all atom/swap 100 200 123245 ${temp} ke no types 3 4
+    #fix swap35 all atom/swap 100 200 123145 ${temp} ke no types 3 5
+    #fix swap45 all atom/swap 250 333 123445 ${temp} ke no types 4 5
+    run 500000
+
+
+# Output saving
+    write_data ${out2}
+    write_restart step500000_Al-Ti-Mo-Cr-W.restart

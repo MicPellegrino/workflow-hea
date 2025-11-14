@@ -1,0 +1,19 @@
+# Parameters
+    variable nr equal 17       # number of box replications per axis
+    variable a0 equal 3.58           # lattice constant [Å]
+    variable temp equal 300.0              # target temperature [K]
+    variable temp_damp equal 0.1    # thermostat damping time [ps]
+    variable press equal 0            # target pressure [bar]
+    variable press_damp equal 1.0  # barostat damping time [ps]
+    variable dt equal 0.001            # integration timestep [ps]
+
+
+# Output filenames
+    variable out0 string "Al-Ti-Mo-Cr-W_ref.data"
+    variable out1 string "Al-Ti-Mo-Cr-W_minimized.data"
+    variable out2 string "Al-Ti-Mo-Cr-W_mcmd.data"
+
+
+# Potential
+    variable ff_style string "eam/alloy"
+    variable ff string "/media/fabiano/a_dev/m2desco/potentials/eam/AlTiMoCrW.eam.alloy"
