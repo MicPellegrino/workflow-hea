@@ -11,21 +11,21 @@
     region     box block 0 1 0 1 0 1 units lattice
     create_box 5 box
     create_atoms 1 box
-    replicate  17 17 17
+    replicate  10 10 10
 
 # Atom types by ratio
 
     set type 1 type/ratio 2     0.2000000000 12346
-    set type 1 type/ratio 3     0.2500000000 12347
-    set type 1 type/ratio 4     0.3333333333 12348
-    set type 1 type/ratio 5     0.5000000000 12349
+    set type 1 type/ratio 3     0.2500000000 123471
+    set type 1 type/ratio 4     0.3333333333 1234821
+    set type 1 type/ratio 5     0.5000000000 12349321
 
 
 # Potential settings
     pair_style ${ff_style}
     pair_coeff * * ${ff} Al Ti Mo Cr W
-    neighbor 2.0 bin
-    neigh_modify delay 0 every 1 check yes
+    neighbor 0.5 bin
+    neigh_modify every 10 delay 10 check yes
 
 
 # Atoms collection

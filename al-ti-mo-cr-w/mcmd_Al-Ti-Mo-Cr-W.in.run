@@ -19,28 +19,48 @@
     run 5000
     unfix equil
 
-# MDMC
+# NVT 
+
+    reset_timestep 0
     timestep ${dt}
     velocity all create ${temp} 368503 rot yes dist gaussian
 
     dump myDump all custom 1000 Al-Ti-Mo-Cr-W.dump id type x y z xu yu zu vx vy vz
     dump_modify myDump element Al Ti Mo Cr W
 
-    fix myMD all npt temp ${temp} ${temp} ${temp_damp} aniso ${press} ${press} ${press_damp}
+    fix myNVT all nvt temp ${temp} ${temp} ${temp_damp}
+    run 100000
+    unfix myNVT
 
-    # Monte Carlo swaps
-    fix swap12 all atom/swap 100 200 134345 ${temp} ke no types 1 2
-    fix swap13 all atom/swap 100 200 163445 ${temp} ke no types 1 3
-    fix swap14 all atom/swap 100 200 134543 ${temp} ke no types 1 4
-    fix swap15 all atom/swap 100 200 234524 ${temp} ke no types 1 5
-    #fix swap23 all atom/swap 250 333 127345 ${temp} ke no types 2 3
-    #fix swap24 all atom/swap 100 200 172345 ${temp} ke no types 2 4
-    #fix swap25 all atom/swap 250 333 123545 ${temp} ke no types 2 5
-    #fix swap34 all atom/swap 100 200 123245 ${temp} ke no types 3 4
-    #fix swap35 all atom/swap 100 200 123145 ${temp} ke no types 3 5
-    #fix swap45 all atom/swap 250 333 123445 ${temp} ke no types 4 5
+# NPT
+
+    fix myNPT1 all npt temp ${temp} ${temp} ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 200000
+    unfix myNPT1
+
+# MCMD
+
+    fix myNPT2 all npt temp ${temp} ${temp} ${temp_damp} aniso ${press} ${press} ${press_damp}
+
+    ### Monte Carlo swaps ###
+
+    fix swap12 all atom/swap ${mc_steps} ${mc_attemp} 134345 ${temp_mc} ke no types 1 2
+    # fix swap13 all atom/swap ${mc_steps} ${mc_attemp} 163445 ${temp_mc} ke no types 1 3
+    # fix swap14 all atom/swap ${mc_steps} ${mc_attemp} 134543 ${temp_mc} ke no types 1 4
+    # fix swap15 all atom/swap ${mc_steps} ${mc_attemp} 234524 ${temp_mc} ke no types 1 5
+    
+    fix swap23 all atom/swap ${mc_steps} ${mc_attemp} 127345 ${temp_mc} ke no types 2 3
+    # fix swap24 all atom/swap ${mc_steps} ${mc_attemp} 172345 ${temp_mc} ke no types 2 4
+    # fix swap25 all atom/swap ${mc_steps} ${mc_attemp} 123545 ${temp_mc} ke no types 2 5
+    
+    fix swap34 all atom/swap ${mc_steps} ${mc_attemp} 123245 ${temp_mc} ke no types 3 4
+    # fix swap35 all atom/swap ${mc_steps} ${mc_attemp} 123145 ${temp_mc} ke no types 3 5
+    
+    fix swap45 all atom/swap ${mc_steps} ${mc_attemp} 123445 ${temp_mc} ke no types 4 5
+    
+    fix swap51 all atom/swap ${mc_steps} ${mc_attemp} 123445 ${temp_mc} ke no types 5 1
+
     run 500000
-
 
 # Output saving
     write_data ${out2}
