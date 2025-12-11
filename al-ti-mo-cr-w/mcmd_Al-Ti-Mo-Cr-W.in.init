@@ -20,4 +20,5 @@
 
 # Potential
     variable ff_style string "eam/alloy"
-    variable ff string "../potential-files/eam/potfit.out.lammps.EAM"
+    # variable ff string "../potential-files/eam/potfit.out.lammps.EAM"
+    variable ff string "../potential-files/eam/potfit_fixed.EAM"
