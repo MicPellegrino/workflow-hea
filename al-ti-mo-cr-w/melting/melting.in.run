@@ -1,0 +1,82 @@
+# Thermo
+    variable pea_avg equal "pe/atoms"       # average potential energy per atom [eV]
+    variable kea_avg equal "ke/atoms"     # average kinetic energy per atom [eV]
+    
+    thermo 1000
+    thermo_style custom step temp press lx ly lz density pe ke v_pea_avg v_kea_avg cpu
+
+# Minimization
+    fix myMin all box/relax iso 0.0 vmax 0.001
+    min_style cg
+    minimize 1e-4 1e-5 1000 10000
+    unfix myMin
+    reset_timestep 0
+    write_data ${out1}
+
+
+    fix equil all npt temp 300.0 300.0 100.0 iso 0.0 0.0 1000.0
+    run 5000
+    unfix equil
+
+# Output temperature
+
+    reset_timestep 0
+    timestep ${dt}
+    velocity all create ${temp} 368503 rot yes dist gaussian
+
+    fix myat1 all ave/time 10 100 10000 v_Toutput file temperature.dat
+    fix myat2 all ave/time 10 100 10000 v_pea_avg file potential.dat
+
+# NVT 
+
+
+    dump myDump all custom 1000 Al-Ti-Mo-Cr-W.dump id type x y z xu yu zu vx vy vz
+    dump_modify myDump element Al Ti Mo Cr W
+
+    fix myNVT all nvt temp ${temp} ${temp} ${temp_damp}
+    run 100000
+    unfix myNVT
+
+# NPT
+
+    fix myNPT1 all npt temp ${temp} ${temp} ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 200000
+    unfix myNPT1
+
+# Heating + NVT steps
+
+    fix myNVT all npt temp 300 300 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 100000
+    unfix myNVT
+
+    fix myMelt all nvt temp 300 500 ${temp_damp}
+    run 100000
+    unfix myMelt
+
+    fix myNVT all npt temp 500 500 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 100000
+    unfix myNVT
+
+    fix myMelt all nvt temp 500 700 ${temp_damp}
+    run 100000
+    unfix myMelt
+
+    fix myNVT all npt temp 700 700 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 100000
+    unfix myNVT
+
+    fix myMelt all nvt temp 700 900 ${temp_damp}
+    run 100000
+    unfix myMelt
+
+    fix myNVT all npt temp 900 900 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 100000
+    unfix myNVT
+
+    fix myMelt all nvt temp 900 1100 ${temp_damp}
+    run 100000
+    unfix myMelt
+
+
+# Output saving
+    write_data ${out2}

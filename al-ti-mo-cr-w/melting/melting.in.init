@@ -1,0 +1,22 @@
+# Parameters
+    variable nr equal 15            # number of box replications per axis
+    variable a0 equal 3.1           # lattice constant [Å]
+    variable temp equal 300.0       # target temperature [K]
+    variable temp_max equal 2000.0  # max. temperature [K]
+    variable temp_damp equal 1.0    # thermostat damping time [ps]
+    variable press equal 0          # target pressure [bar]
+    variable press_damp equal 5.0   # barostat damping time [ps]
+    variable dt equal 0.001         # integration timestep [ps]
+    variable mc_steps equal 500     # MC swap attempt frequency
+    variable mc_attemp equal 100    # MC swap attempts per call
+    variable Toutput equal temp
+
+# Output filenames
+    variable out0 string "Al-Ti-Mo-Cr-W_ref.data"
+    variable out1 string "Al-Ti-Mo-Cr-W_minimized.data"
+    variable out2 string "Al-Ti-Mo-Cr-W_molten.data"
+
+
+# Potential
+    variable ff_style string "eam/alloy"
+    variable ff string "../../potential-files/eam/potfit.out.lammps.EAM"
