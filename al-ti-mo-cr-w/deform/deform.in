@@ -1,0 +1,19 @@
+# ----------------- Init Section -----------------
+
+include "deform.in.init"
+
+
+# ----------------- Atom Definition Section -----------------
+
+read_data "init-conf.data"
+
+# ----------------- Settings Section -----------------
+
+include "deform.in.settings"
+
+# ----------------- Run Section -----------------
+
+include "deform.in.run"
+
+
+

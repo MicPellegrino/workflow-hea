@@ -1,0 +1,23 @@
+# Thermo output
+	thermo          1000
+	thermo_style    custom step temp press pe ke etotal vol density lx pxx 
+	thermo_modify   flush yes
+
+# Dump configuration
+	dump            d1 all custom 50000 deform_system.dump id type x y z xu yu zu vx vy vz
+	dump_modify     d1 element Al Ti Mo Cr W
+
+# Output temperature
+	fix myat1 all ave/time 10 100 5000 v_Toutput file temperature.dat
+	fix myat2 all ave/time 10 100 5000 v_Strain v_Stress file strain-stress.dat
+
+
+# ----- DEFORM -----
+	velocity        all create ${Teq} 385639 dist gaussian
+	fix             feq0 all nvt temp ${Teq} ${Teq} ${tdamp}
+	fix 			def0 all deform 1 x erate ${er0} remap v
+	run             2000000		# 2 ns
+
+# ----- FINAL OUTPUT -----
+	write_data      deform_W-Mo.data
+

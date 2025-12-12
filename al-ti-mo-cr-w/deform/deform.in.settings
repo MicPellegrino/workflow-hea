@@ -1,0 +1,7 @@
+# ----- SETTINGS -----
+# Forcefield
+	pair_coeff * * ../../potential-files/eam/potfit_fixed.EAM Al Ti Mo Cr W
+
+# Collection of atoms
+	group alloy type  1 2 3 4 5
+	

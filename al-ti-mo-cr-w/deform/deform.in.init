@@ -1,0 +1,38 @@
+# ----- VARIABLES -----
+	variable Teq    equal 300     	# Temperature (K)
+	variable er0    equal 1e-4 		# Initial strain rate (1/ps)
+	variable Toutput equal temp
+	variable Lx0 equal 30.969
+	# variable Lx equal lx 
+	# variable Pxx equal pxx
+	variable Stress equal "-pxx"
+	variable Strain equal "(lx-v_Lx0)/v_Lx0"
+
+
+# Fixed time parameters
+	variable tdamp  equal 0.1     # Thermostat damping (ps)
+	variable pdamp  equal 1.0     # Barostat damping (ps)
+
+
+# Output name files
+	variable run  string deform_Gorr
+
+
+
+# ----- DETAILS -----
+	echo            log
+	log             ${run}.log
+
+
+# Styles
+	units        metal
+	atom_style   atomic
+	pair_style   eam/alloy
+
+# Neighbour list
+	neighbor        2.0 bin
+	neigh_modify    check yes
+
+
+# Boundary conditions
+	boundary p p p
