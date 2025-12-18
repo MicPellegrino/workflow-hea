@@ -16,7 +16,7 @@
 	velocity        all create ${Teq} 385639 dist gaussian
 	fix             feq0 all nvt temp ${Teq} ${Teq} ${tdamp}
 	fix 			def0 all deform 1 x erate ${er0} remap v
-	run             2000000		# 2 ns
+	run             5000000		# 5 ns
 
 # ----- FINAL OUTPUT -----
 	write_data      deform_W-Mo.data

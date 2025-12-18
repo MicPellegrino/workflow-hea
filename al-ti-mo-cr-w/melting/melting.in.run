@@ -1,5 +1,5 @@
 # Thermo
-    variable pea_avg equal "pe/atoms"       # average potential energy per atom [eV]
+    variable pea_avg equal "pe/atoms"     # average potential energy per atom [eV]
     variable kea_avg equal "ke/atoms"     # average kinetic energy per atom [eV]
     
     thermo 1000
@@ -26,6 +26,7 @@
 
     fix myat1 all ave/time 10 100 10000 v_Toutput file temperature.dat
     fix myat2 all ave/time 10 100 10000 v_pea_avg file potential.dat
+    fix myat3 all ave/time 10 100 10000 v_kea_avg file kinetic.dat
 
 # NVT 
 
@@ -34,49 +35,92 @@
     dump_modify myDump element Al Ti Mo Cr W
 
     fix myNVT all nvt temp ${temp} ${temp} ${temp_damp}
-    run 100000
+    run 50000
     unfix myNVT
 
 # NPT
 
     fix myNPT1 all npt temp ${temp} ${temp} ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 200000
+    run 100000
     unfix myNPT1
 
-# Heating + NVT steps
+# Heating NVT + relaxation steps
 
-    fix myNVT all npt temp 300 300 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 100000
+    fix myRel all npt temp 300 300 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
+
+    fix myNVT all nvt temp 300 400 ${temp_damp}
+    run 50000
     unfix myNVT
 
-    fix myMelt all nvt temp 300 500 ${temp_damp}
-    run 100000
-    unfix myMelt
+    fix myRel all npt temp 400 400 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
 
-    fix myNVT all npt temp 500 500 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 100000
+    fix myNVT all nvt temp 400 500 ${temp_damp}
+    run 50000
     unfix myNVT
 
-    fix myMelt all nvt temp 500 700 ${temp_damp}
-    run 100000
-    unfix myMelt
+    fix myRel all npt temp 500 500 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
 
-    fix myNVT all npt temp 700 700 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 100000
+    fix myNVT all nvt temp 500 600 ${temp_damp}
+    run 50000
     unfix myNVT
 
-    fix myMelt all nvt temp 700 900 ${temp_damp}
-    run 100000
-    unfix myMelt
+    fix myRel all npt temp 600 600 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
 
-    fix myNVT all npt temp 900 900 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 100000
+    fix myNVT all nvt temp 600 700 ${temp_damp}
+    run 50000
     unfix myNVT
 
-    fix myMelt all nvt temp 900 1100 ${temp_damp}
-    run 100000
-    unfix myMelt
+    fix myRel all npt temp 700 700 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
 
+    fix myNVT all nvt temp 700 800 ${temp_damp}
+    run 50000
+    unfix myNVT
+
+    fix myRel all npt temp 800 800 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
+
+    fix myNVT all nvt temp 800 900 ${temp_damp}
+    run 50000
+    unfix myNVT
+
+    fix myRel all npt temp 900 900 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
+
+    fix myNVT all nvt temp 900 1000 ${temp_damp}
+    run 50000
+    unfix myNVT
+
+    fix myRel all npt temp 1000 1000 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
+
+    fix myNVT all nvt temp 1000 1100 ${temp_damp}
+    run 50000
+    unfix myNVT
+
+    fix myRel all npt temp 1100 1100 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
+
+    fix myNVT all nvt temp 1100 1200 ${temp_damp}
+    run 50000
+    unfix myNVT
+
+    fix myRel all npt temp 1200 1200 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 50000
+    unfix myRel
 
 # Output saving
     write_data ${out2}
