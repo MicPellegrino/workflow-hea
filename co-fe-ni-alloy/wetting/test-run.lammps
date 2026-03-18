@@ -1,0 +1,49 @@
+variable    in_droplet  string "droplet.data"
+variable    in_surface  string "surface.data"
+variable    out_conf    string "conf-test.data"
+variable    out_traj    string "traj-test.dump"
+variable    ff_file     string "../../potential-files/eam/FeNiCrCoCu-with-ZBL.eam.alloy"
+
+# initial temperature for the droplet and the surface
+variable    Tdrop equal 2200
+variable    Tsurf equal 1400
+
+units           metal
+atom_style      atomic
+pair_style      eam/alloy
+neighbor        2.0 bin
+neigh_modify    check yes
+boundary        p p p
+pair_style      eam/alloy
+
+read_data   ${in_droplet} extra/atom/types 3
+read_data   ${in_surface} add append offset 3 0 0 0 0
+
+pair_coeff  * * ${ff_file} Co Fe Ni Co Fe Ni
+group       droplet type 1 2 3
+group       surface type 4 5 6
+
+thermo          1000
+thermo_style    custom step temp press pe ke etotal vol density
+thermo_modify   flush yes
+
+fix             df1 all property/atom mol
+fix             df2 all property/atom q
+compute         ckatom all ke/atom
+fix             akatom all ave/atom 500 1 500 c_ckatom 
+variable 	    dummyMol atom "gmask(droplet)+2.0*gmask(surface)"
+dump 		    d1 all custom 500 ${out_traj} id v_dummyMol type q x y z vx vy vz f_akatom
+dump_modify	    d1 element Co Fe Ni Co Fe Ni
+
+timestep    0.001
+velocity    droplet create ${Tdrop} 123918 rot yes mom yes dist gaussian
+velocity    surface create ${Tsurf} 987687 rot yes mom yes dist gaussian
+
+# Test run
+fix     NveDrop droplet nve
+fix     NvtSurf surface nvt temp ${Tsurf} ${Tsurf} 1.0
+run     10000
+unfix   NveDrop
+unfix   NvtSurf
+
+write_data  ${out_conf}
