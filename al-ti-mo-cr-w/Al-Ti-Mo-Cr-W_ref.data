@@ -1,4 +1,4 @@
-LAMMPS data file via write_data, version 12 Jun 2025, timestep = 0, units = metal
+LAMMPS data file via write_data, version 22 Jul 2025, timestep = 0, units = metal
 
 2000 atoms
 5 atom types
@@ -15,7 +15,7 @@ Masses
 4 51.996
 5 183.5
 
-Atoms # atomic
+Atoms # atomic/kk
 
 1 3 0 0 0 0 0 0
 2 2 1.55 1.55 1.55 0 0 0

@@ -2,7 +2,7 @@
     variable nr equal 15            # number of box replications per axis
     variable a0 equal 3.1           # lattice constant [Å]
     variable temp equal 300.0       # target temperature [K]
-    variable temp_max equal 2000.0  # max. temperature [K]
+    variable temp_max equal 4500.0  # max. temperature [K]
     variable temp_damp equal 1.0    # thermostat damping time [ps]
     variable press equal 0          # target pressure [bar]
     variable press_damp equal 5.0   # barostat damping time [ps]
@@ -20,4 +20,5 @@
 # Potential
     variable ff_style string "eam/alloy"
     # variable ff string "../../potential-files/eam/potfit.out.lammps.EAM"
-    variable ff string "../../potential-files/eam/potfit_fixed.EAM"
+    # variable ff string "../../potential-files/eam/potfit_fixed.EAM"
+    variable ff string "../potfit.out.lammps.EAM"

@@ -47,79 +47,39 @@
 # Heating NVT + relaxation steps
 
     fix myRel all npt temp 300 300 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
+    run 5000
     unfix myRel
 
-    fix myNVT all nvt temp 300 400 ${temp_damp}
+    fix myNVT all nvt temp 300 1300 ${temp_damp}
     run 50000
     unfix myNVT
 
-    fix myRel all npt temp 400 400 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
+    fix myRel all npt temp 1300 1300 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 5000
     unfix myRel
 
-    fix myNVT all nvt temp 400 500 ${temp_damp}
+    fix myNVT all nvt temp 1300 2300 ${temp_damp}
     run 50000
     unfix myNVT
 
-    fix myRel all npt temp 500 500 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
+    fix myRel all npt temp 2300 2300 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 5000
     unfix myRel
 
-    fix myNVT all nvt temp 500 600 ${temp_damp}
+    fix myNVT all nvt temp 2300 3300 ${temp_damp}
     run 50000
     unfix myNVT
 
-    fix myRel all npt temp 600 600 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
+    fix myRel all npt temp 3300 3300 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 5000
     unfix myRel
 
-    fix myNVT all nvt temp 600 700 ${temp_damp}
+    fix myNVT all nvt temp 3300 4300 ${temp_damp}
     run 50000
     unfix myNVT
 
-    fix myRel all npt temp 700 700 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
-    unfix myRel
-
-    fix myNVT all nvt temp 700 800 ${temp_damp}
-    run 50000
-    unfix myNVT
-
-    fix myRel all npt temp 800 800 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
-    unfix myRel
-
-    fix myNVT all nvt temp 800 900 ${temp_damp}
-    run 50000
-    unfix myNVT
-
-    fix myRel all npt temp 900 900 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
-    unfix myRel
-
-    fix myNVT all nvt temp 900 1000 ${temp_damp}
-    run 50000
-    unfix myNVT
-
-    fix myRel all npt temp 1000 1000 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
-    unfix myRel
-
-    fix myNVT all nvt temp 1000 1100 ${temp_damp}
-    run 50000
-    unfix myNVT
-
-    fix myRel all npt temp 1100 1100 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
-    unfix myRel
-
-    fix myNVT all nvt temp 1100 1200 ${temp_damp}
-    run 50000
-    unfix myNVT
-
-    fix myRel all npt temp 1200 1200 ${temp_damp} aniso ${press} ${press} ${press_damp}
-    run 50000
+    fix myRel all npt temp 4300 4300 ${temp_damp} aniso ${press} ${press} ${press_damp}
+    run 5000
     unfix myRel
 
 # Output saving

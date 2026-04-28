@@ -8,8 +8,8 @@
     variable press equal 0          # target pressure [bar]
     variable press_damp equal 5.0   # barostat damping time [ps]
     variable dt equal 0.001         # integration timestep [ps]
-    variable mc_steps equal 500     # MC swap attempt frequency
-    variable mc_attemp equal 100    # MC swap attempts per call
+    variable mc_steps equal 1000     # MC swap attempt frequency
+    variable mc_attemp equal 50    # MC swap attempts per call
 
 
 # Output filenames
@@ -21,4 +21,5 @@
 # Potential
     variable ff_style string "eam/alloy"
     # variable ff string "../potential-files/eam/potfit.out.lammps.EAM"
-    variable ff string "../potential-files/eam/potfit_fixed.EAM"
+    # variable ff string "../potential-files/eam/potfit_fixed.EAM"
+    variable ff string "potfit.out.lammps.EAM"

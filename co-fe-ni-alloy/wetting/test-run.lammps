@@ -27,10 +27,11 @@ thermo          1000
 thermo_style    custom step temp press pe ke etotal vol density
 thermo_modify   flush yes
 
+reset_timestep 	0
 fix             df1 all property/atom mol
 fix             df2 all property/atom q
 compute         ckatom all ke/atom
-fix             akatom all ave/atom 500 1 500 c_ckatom 
+fix             akatom all ave/atom 1 500 500 c_ckatom 
 variable 	    dummyMol atom "gmask(droplet)+2.0*gmask(surface)"
 dump 		    d1 all custom 500 ${out_traj} id v_dummyMol type q x y z vx vy vz f_akatom
 dump_modify	    d1 element Co Fe Ni Co Fe Ni

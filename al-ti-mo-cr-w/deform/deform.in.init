@@ -1,6 +1,6 @@
 # ----- VARIABLES -----
 	variable Teq    equal 300     	# Temperature (K)
-	variable er0    equal 1e-4 		# Initial strain rate (1/ps)
+	variable er0    equal 1e-3 		# Initial strain rate (1/ps)
 	variable Toutput equal temp
 	variable Lx0 equal 30.969
 	# variable Lx equal lx 
