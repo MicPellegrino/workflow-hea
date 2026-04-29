@@ -1,0 +1,37 @@
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic
+atom_modify map array
+newton on
+
+# Number of box replicates
+variable nr equal 25
+
+# File names
+variable indata string "TiN_${nr}x${nr}x${nr}.data"
+variable outfolder string "confs"
+variable outdata string "${outfolder}/TiN_${nr}_fcc.data"
+variable libfile string "../potential-files/meam/kim/library.meam"
+variable modelfile string "../potential-files/meam/kim/TiN.meam"
+
+read_data ${indata}
+
+mass    1 47.88     # Ti
+mass    2 14.0070   # N
+
+pair_style   meam
+pair_coeff   * * ${libfile} Ti N ${modelfile} Ti N
+neighbor 2.0 bin
+neigh_modify delay 0 every 1 check yes
+
+write_data ${outdata}
+
+# Energy minimization
+fix 1 all box/relax iso 0.0 vmax 0.001  
+thermo 10 
+thermo_style custom step pe lx ly lz press 
+min_style cg 
+minimize 1e-4 1e-5 1000 10000
+
+write_data ${outdata}
