@@ -1,0 +1,78 @@
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic
+atom_modify map array
+
+# File names
+variable indata0 string "../equilibration/AlW_equil.data"
+variable outdata0 string "AlW_final.data"
+variable ffname string "../../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy"
+
+variable Nrun equal 1000000
+variable Ndump equal 100000
+variable Nheat equal 10
+variable fluxIn equal 20.0
+variable regWidth equal 10.0
+
+variable fluxOut equal -v_fluxIn
+variable zloDyn equal zlo
+variable zhiDyn equal zhi
+variable zInLow equal v_zloDyn+0.5*v_regWidth
+variable zInHigh equal v_zhiDyn-0.5*v_regWidth
+variable zOutLow equal 0.5*(v_zloDyn+v_zhiDyn)-0.5*v_regWidth
+variable zOutHigh equal 0.5*(v_zloDyn+v_zhiDyn)+0.5*v_regWidth
+
+variable zIn_check atom "z < v_zInLow || z > v_zInHigh"
+variable zOut_check atom "z > v_zOutLow && z < v_zOutHigh"
+
+read_data ${indata0}
+
+region regionIn1 block EDGE EDGE EDGE EDGE v_zloDyn v_zInLow units box
+region regionIn2 block EDGE EDGE EDGE EDGE v_zInHigh v_zhiDyn units box
+region regionIn union 2 regionIn1 regionIn2 units box
+region regionOut block EDGE EDGE EDGE EDGE v_zOutLow v_zOutHigh units box
+
+group substrate type 1
+group liquid type 2
+
+run 0
+
+pair_style eam/alloy 
+pair_coeff * * ${ffname} W Al
+neighbor 2.0 bin
+neigh_modify delay 0 every 1 check yes
+
+thermo 1000
+thermo_style custom step temp pe lx ly lz zlo zhi press 
+
+dump myDump all custom ${Ndump} AlW.dump id type x y z
+dump_modify myDump element W Al
+
+timestep 0.001
+
+compute compTliq liquid temp
+compute compTsol substrate temp
+compute 3 substrate pe/atom
+compute 5 substrate reduce sum c_3
+compute 4 substrate ke
+compute liquidChunk liquid chunk/atom bin/1d z center 2 units box
+compute 6 liquid temp/chunk liquidChunk temp com yes
+compute solidChunk substrate chunk/atom bin/1d z center 2 units box
+compute 7 substrate temp/chunk solidChunk temp com yes
+
+fix tempChunkBiasLiq liquid ave/time 1 ${Ndump} ${Ndump} c_6[1] file temp_chunk_bias_liq.txt mode vector
+fix tempChunkLiq liquid ave/chunk 1 ${Ndump} ${Ndump} liquidChunk temp ave one file slab_position_check_liq.txt
+fix tempChunkBiasSol substrate ave/time 1 ${Ndump} ${Ndump} c_7[1] file temp_chunk_bias_sol.txt mode vector
+fix tempChunkSol substrate ave/chunk 1 ${Ndump} ${Ndump} solidChunk temp ave one file slab_position_check_sol.txt
+
+fix nphHeat all nph z 0.0 0.0 5.0
+
+fix heatIn all heat ${Nheat} ${fluxIn} region regionIn
+fix heatOut all heat ${Nheat} ${fluxOut} region regionOut
+
+run ${Nrun}
+
+unfix nphHeat
+
+write_data ${outdata0}

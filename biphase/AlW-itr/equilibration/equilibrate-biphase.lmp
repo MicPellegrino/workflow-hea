@@ -1,0 +1,98 @@
+units metal 
+dimension 3 
+boundary p p p
+atom_style atomic
+atom_modify map array
+
+# File names
+variable indata0 string "../AlW_ref.data"
+variable outdata0 string "AlW_equil.data"
+variable ffname string "../../../potential-files/eam/CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy"
+
+# Non-isothermal
+# variable Tsol equal 1000
+# variable Tliq equal 1400
+
+# Isothermal
+variable Tref equal 1200
+
+read_data ${indata0}
+
+group substrate type 1
+group liquid type 2
+
+pair_style eam/alloy 
+pair_coeff * * ${ffname} W Al
+neighbor 2.0 bin
+neigh_modify delay 0 every 1 check yes
+
+thermo 500
+thermo_style custom step temp pe lx ly lz press 
+
+dump myDump all custom 1000 AlW.dump id type x y z
+dump_modify myDump element W Al
+
+timestep 0.001
+
+# NVT - nonisothermal
+# fix nvtSol substrate nvt temp ${Tsol} ${Tsol} 1.0
+# fix nvtLiq liquid nvt temp ${Tliq} ${Tliq} 1.0
+
+# NVT - isothermal
+fix nvtSystem all nvt temp ${Tref} ${Tref} 1.0
+
+run 200000
+
+# unfix nvtSol
+# unfix nvtLiq
+unfix nvtSystem
+
+# NPT - nonisothermal
+# fix nvtSol substrate nvt temp ${Tsol} ${Tsol} 1.0
+# fix nptLiq liquid npt temp ${Tliq} ${Tliq} 1.0 z 0.0 0.0 5.0
+
+# NPT - nonisothermal
+fix nptSystem all npt temp ${Tref} ${Tref} 1.0 z 0.0 0.0 5.0
+
+run 300000
+
+# unfix nvtSol
+# unfix nptLiq
+unfix nptSystem
+
+# compute keCompute all ke/atom
+# compute keBins all chunk/atom bin/1d z lower 1.2 units box
+# fix keProfile all ave/chunk 1 20000 20000 keBins c_keCompute file temperature_profile.dat
+
+compute compTliq liquid temp
+compute compTsol substrate temp
+compute 3 substrate pe/atom
+compute 5 substrate reduce sum c_3
+compute 4 substrate ke
+compute liquidChunk liquid chunk/atom bin/1d z center 2 units box
+compute 6 liquid temp/chunk liquidChunk temp com yes 
+compute solidChunk substrate chunk/atom bin/1d z center 2 units box
+compute 7 substrate temp/chunk solidChunk temp com yes 
+
+# fix temp_liq liquid ave/time 1 1 10 c_compTliq file system_liq.txt
+# fix temp_sol substrate ave/time 1 1 10 c_compTsol file system_sol.txt 
+# fix PotEn substrate ave/time 1 1 10 c_5 file potential_sol.txt 
+# fix KinEn substrate ave/time 1 1 10 c_4 file kinetic_sol.txt
+
+fix tempChunkBiasLiq liquid ave/time 1 1 10 c_6[1] file temp_chunk_bias_liq.out mode vector
+fix tempChunkLiq liquid ave/chunk 1 1 20000 liquidChunk temp ave one file slab_position_check_liq.txt
+fix tempChunkBiasSol substrate ave/time 1 1 10 c_7[1] file temp_chunk_bias_sol.out mode vector
+fix tempChunkSol substrate ave/chunk 1 1 20000 liquidChunk temp ave one file slab_position_check_sol.txt
+
+# fix nvtSol substrate nvt temp ${Tsol} ${Tsol} 1.0
+# fix nvtLiq liquid nvt temp ${Tliq} ${Tliq} 1.0
+
+fix nvtProduction all nvt temp ${Tref} ${Tref} 1.0
+
+run 200000
+
+# unfix nvtSol
+# unfix nvtLiq
+unfix nvtProduction
+
+write_data ${outdata0}
